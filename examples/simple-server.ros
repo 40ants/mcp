@@ -1,0 +1,236 @@
+#!/bin/sh
+#|-*- mode:lisp -*-|#
+#|
+exec ros -Q -- $0 "$@"
+|#
+
+;;;; Simple MCP Server Example - Roswell Script Version
+;;;; 
+;;;; This example demonstrates how to create a basic MCP server
+;;;; with tools, resources, and prompts using the 40ants-mcp framework
+;;;; and run it as a Roswell script.
+;;;;
+;;;; Usage: 
+;;;;   ./simple-server.ros
+;;;;   ros simple-server.ros
+;;;;
+;;;; With SLYNK support for remote debugging:
+;;;;   SLYNK_PORT=4005 ./simple-server.ros
+;;;;   SLYNK_PORT=4005 SLYNK_INTERFACE=0.0.0.0 ./simple-server.ros
+
+;; Load required systems
+(ql:quickload '(:40ants-mcp :alexandria :local-time :40ants-slynk) :silent t)
+
+(defpackage #:simple-mcp-server
+  (:use #:cl)
+  (:import-from #:40ants-mcp/core
+                #:mcp-server
+                #:add-tool
+                #:add-resource
+                #:add-prompt
+                #:start-server)
+  (:import-from #:40ants-slynk
+                #:start-slynk-if-needed)
+  (:import-from #:alexandria)
+  (:export #:main))
+(in-package #:simple-mcp-server)
+
+(defun create-example-server ()
+  "Create an example MCP server with some demo tools, resources, and prompts"
+  (let ((server (make-instance 'mcp-server
+                               :name "Simple Example Server (Roswell)"
+                               :version "1.0.0")))
+    
+    ;; Add some example tools
+    (add-tool server 
+              "echo"
+              "Echo back the provided text"
+              (alexandria:alist-hash-table
+               '(("type" . "object")
+                 ("properties" . (("text" . (("type" . "string")
+                                             ("description" . "Text to echo back")))))
+                 ("required" . ("text"))))
+              (lambda (args)
+                (let ((text (getf args :|text|)))
+                  (list (alexandria:alist-hash-table
+                         `(("type" . "text")
+                           ("text" . ,(format nil "Echo: ~A" text))))))))
+    
+    (add-tool server
+              "add_numbers"
+              "Add two numbers together"
+              (alexandria:alist-hash-table
+               '(("type" . "object")
+                 ("properties" . (("a" . (("type" . "number")
+                                          ("description" . "First number")))
+                                  ("b" . (("type" . "number")
+                                          ("description" . "Second number")))))
+                 ("required" . ("a" "b"))))
+              (lambda (args)
+                (let ((a (getf args :|a|))
+                      (b (getf args :|b|)))
+                  (list (alexandria:alist-hash-table
+                         `(("type" . "text")
+                           ("text" . ,(format nil "~A + ~A = ~A" a b (+ a b)))))))))
+    
+    (add-tool server
+              "current_time"
+              "Get the current date and time"
+              (alexandria:alist-hash-table
+               '(("type" . "object")
+                 ("properties" . ())
+                 ("required" . ())))
+              (lambda (args)
+                (declare (ignore args))
+                (list (alexandria:alist-hash-table
+                       `(("type" . "text")
+                         ("text" . ,(format nil "Current time: ~A" 
+                                            (local-time:format-timestring 
+                                             nil (local-time:now)))))))))
+
+    (add-tool server
+              "system_info"
+              "Get information about the Lisp system and Roswell environment"
+              (alexandria:alist-hash-table
+               '(("type" . "object")
+                 ("properties" . ())
+                 ("required" . ())))
+              (lambda (args)
+                (declare (ignore args))
+                (let ((slynk-port (uiop:getenv "SLYNK_PORT"))
+                      (slynk-interface (uiop:getenv "SLYNK_INTERFACE")))
+                  (list (alexandria:alist-hash-table
+                         `(("type" . "text")
+                           ("text" . ,(format nil "Lisp: ~A ~A~%Roswell: ~A~%SLYNK: ~A~%Features: ~A"
+                                              (lisp-implementation-type)
+                                              (lisp-implementation-version)
+                                              (or (uiop:getenv "ROSWELL_VERSION") "Unknown")
+                                              (if slynk-port
+                                                  (format nil "Available on ~A:~A" 
+                                                         (or slynk-interface "localhost")
+                                                         slynk-port)
+                                                  "Not configured (set SLYNK_PORT to enable)")
+                                              (mapcar #'string *features*)))))))
+    
+    ;; Add some example resources
+    (add-resource server
+                  "file:///example.txt"
+                  "Example Text File"
+                  "A simple example text file"
+                  "text/plain"
+                  (lambda (uri)
+                    (declare (ignore uri))
+                    (list (alexandria:alist-hash-table
+                           '(("uri" . "file:///example.txt")
+                             ("mimeType" . "text/plain")
+                             ("text" . "This is an example text file content.
+It demonstrates how resources work in MCP.
+You can return any kind of content here.
+This server is running as a Roswell script!"))))))
+    
+    (add-resource server
+                  "memory://server-stats"
+                  "Server Statistics"
+                  "Current server statistics and information"
+                  "application/json"
+                  (lambda (uri)
+                    (declare (ignore uri))
+                    (list (alexandria:alist-hash-table
+                           `(("uri" . "memory://server-stats")
+                             ("mimeType" . "application/json")
+                             ("text" . ,(format nil "{
+  \"server_name\": \"~A\",
+  \"uptime\": \"~A seconds\",
+  \"tools_count\": ~A,
+  \"resources_count\": ~A,
+  \"prompts_count\": ~A,
+  \"lisp_implementation\": \"~A ~A\",
+  \"roswell_version\": \"~A\"
+}"
+                                                "Simple Example Server (Roswell)"
+                                                (get-universal-time)
+                                                (hash-table-count (slot-value server '40ants-mcp/core::tools))
+                                                (hash-table-count (slot-value server '40ants-mcp/core::resources))
+                                                (hash-table-count (slot-value server '40ants-mcp/core::prompts))
+                                                (lisp-implementation-type)
+                                                (lisp-implementation-version)
+                                                (or (uiop:getenv "ROSWELL_VERSION") "Unknown"))))))))
+
+    (add-resource server
+                  "roswell://environment"
+                  "Roswell Environment"
+                  "Information about the current Roswell environment"
+                  "text/plain"
+                  (lambda (uri)
+                    (declare (ignore uri))
+                    (let ((ros-home (uiop:getenv "ROSWELL_HOME"))
+                          (ros-version (uiop:getenv "ROSWELL_VERSION"))
+                          (ros-lisp (uiop:getenv "ROSWELL_LISP")))
+                      (list (alexandria:alist-hash-table
+                             `(("uri" . "roswell://environment")
+                               ("mimeType" . "text/plain")
+                               ("text" . ,(format nil "Roswell Environment Information:
+ROSWELL_HOME: ~A
+ROSWELL_VERSION: ~A  
+ROSWELL_LISP: ~A
+Current Lisp: ~A ~A
+Script Path: ~A
+"
+                                                  (or ros-home "Not set")
+                                                  (or ros-version "Not set")
+                                                  (or ros-lisp "Not set")
+                                                  (lisp-implementation-type)
+                                                  (lisp-implementation-version)
+                                                  (or (first sb-ext:*posix-argv*) "Unknown")))))))))
+    
+    ;; Add some example prompts
+    (add-prompt server
+                "greeting"
+                "Generate a personalized greeting"
+                (alexandria:alist-hash-table
+                 '(("type" . "object")
+                   ("properties" . (("name" . (("type" . "string")
+                                               ("description" . "Name of the person to greet")))
+                                    ("style" . (("type" . "string")
+                                               ("enum" . ("formal" "casual" "friendly"))
+                                               ("description" . "Style of greeting")))))
+                   ("required" . ("name"))))
+                (lambda (args)
+                  (let ((name (getf args :|name|))
+                        (style (getf args :|style| "friendly")))
+                    (let ((greeting 
+                            (cond
+                              ((string= style "formal")
+                               (format nil "Good day, ~A. I hope this message finds you well." name))
+                              ((string= style "casual")
+                               (format nil "Hey ~A! What's up?" name))
+                              (t
+                               (format nil "Hello ~A! Nice to meet you!" name)))))
+                      (alexandria:alist-hash-table
+                       `(("description" . ,(format nil "A ~A greeting for ~A" style name))
+                         ("messages" . ,(list (alexandria:alist-hash-table
+                                               `(("role" . "assistant")
+                                                 ("content" . (("type" . "text")
+                                                              ("text" . ,greeting)))))))))))))
+    
+    server))))
+
+
+(defun main (&rest argv)
+  "Main entry point for the Roswell script"
+  (declare (ignore argv))
+  
+  ;; Start SLYNK server if SLYNK_PORT environment variable is set
+  ;; (start-slynk-if-needed)
+  
+  (let ((server (create-example-server)))
+    (format *error-output* "Starting Simple MCP Server Example (Roswell Script)...~%")
+    (format *error-output* "Lisp: ~A ~A~%" 
+            (lisp-implementation-type)
+            (lisp-implementation-version))
+    (format *error-output* "Roswell: ~A~%" 
+            (or (uiop:getenv "ROSWELL_VERSION") "Unknown"))
+    (format *error-output* "Available tools: echo, add_numbers, current_time, system_info~%")
+    (format *error-output* "Available resources: file:///example.txt, memory://server-stats, roswell://environment~%")
+    (format *error-output* "Available prompts: greeting, roswell_script_template~%")
+    (start-server server))) 
