@@ -4,3 +4,4 @@
 .#*
 *.fasl
 .*.~undo-tree~
+/examples/simple-server

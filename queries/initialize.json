@@ -1,0 +1,1 @@
+{"method":"initialize","params":{"protocolVersion":"2025-03-26","capabilities":{"tools":true,"prompts":false,"resources":false,"logging":false,"roots":{"listChanged":false}},"clientInfo":{"name":"cursor-vscode","version":"1.0.0"}},"jsonrpc":"2.0","id":0}

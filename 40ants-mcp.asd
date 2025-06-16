@@ -21,3 +21,6 @@
                "cl-ppcre"             ; Pattern matching
                "log4cl")              ; Logging
   :in-order-to ((test-op (test-op "40ants-mcp-tests"))))
+
+
+(asdf:register-system-packages "log4cl" '("LOG"))
