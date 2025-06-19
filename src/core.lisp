@@ -291,19 +291,19 @@
 (openrpc-server:define-api (mcp-server :title "MCP Server"))
 
 
-(defmethod handle-initialize ((server mcp-server) id params)
-  "Handle initialization request"
-  (declare (ignore params)) ; For now, ignore client capabilities
-  (setf (server-initialized-p server) t)
-  (let ((response (make-response
-                   id
-                   (alexandria:alist-hash-table
-                    `(("protocolVersion" . "2024-11-05")
-                      ("capabilities" . ,(server-capabilities server))
-                      ("serverInfo" . ,(alexandria:alist-hash-table
-                                        `(("name" . ,(server-name server))
-                                          ("version" . ,(server-version server))))))))))
-    (send-message (server-transport server) response)))
+;; (defmethod handle-initialize ((server mcp-server) id params)
+;;   "Handle initialization request"
+;;   (declare (ignore params)) ; For now, ignore client capabilities
+;;   (setf (server-initialized-p server) t)
+;;   (let ((response (make-response
+;;                    id
+;;                    (alexandria:alist-hash-table
+;;                     `(("protocolVersion" . "2024-11-05")
+;;                       ("capabilities" . ,(server-capabilities server))
+;;                       ("serverInfo" . ,(alexandria:alist-hash-table
+;;                                         `(("name" . ,(server-name server))
+;;                                           ("version" . ,(server-version server))))))))))
+;;     (send-message (server-transport server) response)))
 
 
 (defclass initialize-response ()
@@ -351,6 +351,48 @@
   ((|nextCursor| :type (or null string)
                  :initform nil
                  :initarg :cursor)))
+
+
+(defclass content ()
+  ((type :type string
+         :initform "unknown"
+         :initarg :type)))
+
+
+(defclass text-content (content)
+  ((text :type string
+         :initarg :text))
+  (:default-initargs :type "text"))
+
+
+(defclass tool-call-response ()
+  ((content :type (soft-list-of content)
+            :initarg :content)
+   (|isError| :type boolean
+              :initform nil
+              :initarg :is-error)))
+
+
+(defun do-eval (&key form)
+  (let* ((*package* (find-package "CL-USER"))
+         (expression (uiop:with-safe-io-syntax (:package *package*)
+                       (read-from-string form)))
+         (result (eval expression)))
+    (make-instance 'text-content
+                   :text (prin1-to-string result))))
+
+
+(openrpc-server:define-rpc-method (mcp-server tools/call) (name arguments)
+  (:summary "A method for calling an server tool with given NAME")
+  (:description "Called when MCP client wants do something using a tool.")
+  (:param name string "A tool name")
+  (:param arguments hash-table  "Arguments of a tool.")
+  (:result tool-call-response)
+  (log:info "Called tool" name)
+  
+  (let ((result (do-eval :form (gethash "form" arguments))))
+    (make-instance 'tool-call-response
+                   :content (list result))))
 
 
 (openrpc-server:define-rpc-method (mcp-server tools/list) (&key cursor)
