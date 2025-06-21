@@ -1,8 +1,10 @@
 (uiop:define-package #:40ants-mcp/core
   (:use #:cl)
-  (:import-from #:openrpc-server)
-  (:import-from #:openrpc-server/api)
-  (:import-from #:openrpc-server/method)
+  (:import-from #:openrpc-server
+                #:api-methods)
+  (:import-from #:openrpc-server/method
+                #:method-info
+                #:method-thunk)
   (:import-from #:openrpc-server/discovery
                 #:rpc-discover)
   (:import-from #:40ants-mcp/stdio-transport
@@ -23,10 +25,15 @@
   (:import-from #:log)
   (:import-from #:jsonrpc)
   (:import-from #:serapeum
+                #:fmt
+                #:dict*
+                #:->
                 #:dict
                 #:soft-list-of)
   (:import-from #:serapeum
                 #:dict)
+  (:import-from #:openrpc-server/utils
+                #:sym-to-api-string)
   (:export #:mcp-server
            #:server-name
            #:server-version
@@ -331,7 +338,10 @@
   ((type :type string
          :initform "object")
    (properties :type hash-table
-               :initarg :properties)))
+               :initarg :properties)
+   (required :type (soft-list-of string)
+             :initarg :required
+             :initform nil)))
 
 
 (defclass tool-description ()
@@ -356,13 +366,28 @@
 (defclass content ()
   ((type :type string
          :initform "unknown"
-         :initarg :type)))
+         :initarg :type
+         :reader content-type)))
+
+
+(defmethod print-object ((obj content) stream)
+  (print-unreadable-object (obj stream :type t)
+    (format stream "type: ~A"
+            (content-type obj))))
 
 
 (defclass text-content (content)
   ((text :type string
-         :initarg :text))
+         :initarg :text
+         :reader content-text))
   (:default-initargs :type "text"))
+
+
+(defmethod print-object ((obj text-content) stream)
+  (print-unreadable-object (obj stream :type t)
+    (format stream "type: ~A, text: ~A"
+            (content-type obj)
+            (content-text obj))))
 
 
 (defclass tool-call-response ()
@@ -373,13 +398,160 @@
               :initarg :is-error)))
 
 
-(defun do-eval (&key form)
-  (let* ((*package* (find-package "CL-USER"))
-         (expression (uiop:with-safe-io-syntax (:package *package*)
-                       (read-from-string form)))
-         (result (eval expression)))
-    (make-instance 'text-content
-                   :text (prin1-to-string result))))
+(define-condition tool-error ()
+  ((content :initarg :content
+            :type (or content
+                      (soft-list-of content))
+            :reader tool-error-content))
+  (:report (lambda (condition stream)
+             (format stream "~A"
+                     (tool-error-content condition)))))
+
+
+(openrpc-server:define-api (example-tools :title "Example tools"))
+
+
+(defparameter *mcp-tools*
+  (list example-tools))
+
+
+
+(openrpc-server:define-rpc-method (example-tools eval-lisp-form) (form &key (in-package "CL-USER"))
+  (:summary "Evaluates a given Lisp form and returns a list of values.
+
+             Only one lisp form should be provided as the input.
+             If you need to eval a multiple forms, wrap them into
+             a PROGN or a similar form.
+
+             A multiple values can be returned. Each value is printed in it's own
+             section with a title like VALUE-1, VALUE-2 and so on.
+
+             Also this tool returns STDOUT and STDERR if something was written to these streams.
+
+             In case of an error, the ERROR result with a backtrace will be returned.
+
+             If you need to evaluate form in context of some package other than CL-USER,
+             then pass package name in IN-PACKAGE argument.
+             All FORM symbols without package qualifier, will be interned into this package.")
+  (:param form string "Lisp form to be evaluated, in the s-expression syntax.")
+  (:param in-package string "Common Lisp package name to evaluate form in.")
+  (:result (soft-list-of text-content))
+
+  (block func
+    (with-output-to-string (*standard-output*)
+      (with-output-to-string (*error-output*)
+        (flet ((make-output-results ()
+                 (let ((stdout (str:trim (get-output-stream-string *standard-output*)))
+                       (stderr (str:trim (get-output-stream-string *error-output*))))
+                   (append (unless (str:emptyp stdout)
+                             (list (make-instance 'text-content
+                                                  :text (fmt "## STDOUT~2%~A"
+                                                             stdout))))
+                           (unless (str:emptyp stderr)
+                             (list (make-instance 'text-content
+                                                  :text (fmt "## STDERR~2%~A"
+                                                             stderr))))))))
+          (let* ((result-values
+                   (multiple-value-list
+                    (handler-bind ((serious-condition
+                                     (lambda (c)
+                                       (let ((error-message
+                                               (with-output-to-string (s)
+                                                 (format s "## ERROR~2%")
+                                                 (trivial-backtrace:print-condition c s))))
+                                         (error 'tool-error
+                                                :content (list* (make-instance 'text-content
+                                                                               :text error-message)
+                                                                (make-output-results)))))))
+                      (let* ((*package* (or (find-package in-package)
+                                            (find-package (string-upcase in-package))
+                                            (error 'tool-error
+                                                   :content (list* (make-instance 'text-content
+                                                                                  :text (fmt "Package \"~A\" was not found."
+                                                                                             in-package))))))
+                             (package-name (package-name *package*))
+                             (forms (uiop:with-safe-io-syntax (:package package-name)
+                                      (with-input-from-string (s form)
+                                        (uiop:slurp-stream-forms s))))
+                             ;; To allow eval multiple forms, we need to wrap
+                             ;; them with PROGN:
+                             (expression
+                               (list* 'progn
+                                      forms)))
+                        (eval expression))))))
+
+            (return-from func
+              (append
+               (loop for value in result-values
+                     for idx upfrom 1
+                     collect (make-instance 'text-content
+                                            :text (fmt "## VALUE-~A~2%~A"
+                                                       idx
+                                                       value)))
+               (make-output-results)))))))))
+
+
+
+(-> get-method-params (method-info)
+    (values hash-table
+            list
+            &optional))
+
+
+(defun get-method-params (method-info)
+  "Returns a hash-table describing methods and their type schemas and a list of required params."
+  (loop with results = (dict)
+        with required = nil
+        for param in (openrpc-server/method::method-params method-info)
+        for param-name = (sym-to-api-string (openrpc-server/method::parameter-name param))
+        for param-summary = (openrpc-server/method::parameter-summary param)
+        for param-type = (openrpc-server/method::parameter-type param)
+        for param-required-p = (openrpc-server/method::parameter-required param)
+        for schema = (openrpc-server:type-to-schema param-type)
+        do (setf (gethash param-name results)
+                 (dict* schema
+                        "description" param-summary))
+        when param-required-p
+          do (push param-name required)
+        finally (return (values results
+                                required))))
+
+
+(-> make-tool-descriptions-for-method (string method-info)
+    tool-description)
+
+(defun make-tool-description-for-method (method-name method-info)
+  (multiple-value-bind (params required)
+      (get-method-params method-info)
+    (make-instance
+     'tool-description
+     :name method-name
+     :description "Evaluates given Lisp form and returns from a list of values."
+     :input-schema (make-instance
+                    'input-schema
+                    :properties params
+                    :required required))))
+
+
+(-> make-tool-descriptions (openrpc-server/api:api)
+    (soft-list-of tool-description))
+
+(defun make-tool-descriptions (rpc-server)
+  (loop for name being the hash-key of (api-methods rpc-server)
+            using (hash-value method-info)
+        collect (make-tool-description-for-method name
+                                                  method-info)))
+
+
+(-> search-tool (string (soft-list-of openrpc-server:api))
+    (values (or null
+                method-info)))
+
+(defun search-tool (tool-name tool-collections)
+  (loop for collection in tool-collections
+        for methods = (api-methods collection)
+        for method = (gethash tool-name methods)
+        thereis method))
 
 
 (openrpc-server:define-rpc-method (mcp-server tools/call) (name arguments)
@@ -390,9 +562,31 @@
   (:result tool-call-response)
   (log:info "Called tool" name)
   
-  (let ((result (do-eval :form (gethash "form" arguments))))
-    (make-instance 'tool-call-response
-                   :content (list result))))
+  (let ((tool (search-tool name *mcp-tools*)))
+    (cond
+      (tool
+       (handler-case
+           (let* ((thunk (method-thunk tool))
+                  ;; OpenRPC's internals will care about arguments parsing:
+                  (result (funcall thunk arguments)))
+             (dict "content"
+                   ;; In the result THUNK returns objects already serialized
+                   ;; into the hash-tables:
+                   (uiop:ensure-list result)
+                   "isError"
+                   yason:false))
+         (tool-error (condition)
+           (make-instance 'tool-call-response
+                          :is-error t
+                          :content (uiop:ensure-list
+                                    (tool-error-content condition))))))
+      (t
+       (make-instance 'tool-call-response
+                      :is-error t
+                      :content (list
+                                (make-instance 'text-content
+                                               :text (fmt "Tool \"~A\" does not exist."
+                                                          name))))))))
 
 
 (openrpc-server:define-rpc-method (mcp-server tools/list) (&key cursor)
@@ -401,39 +595,21 @@
   (:param cursor (or null string) "An optional pagination cursor")
   (:result (or tools-list-response
                tools-list-response-with-cursor))
+  ;; See the description and examples in the documentation:
+  ;; https://modelcontextprotocol.io/docs/concepts/tools#python
   (log:info "TOOLS/LIST was called" cursor)
   (let ((tools
-          (list
-           (make-instance
-            'tool-description
-            :name "eval"
-            :description "Evaluates given Lisp form and returns from a list of values."
-            :input-schema (make-instance
-                           'input-schema
-                           :properties (dict
-                                        "form" (dict
-                                                "type" "string"
-                                                "description" "Lisp form to be evaluated, in the s-expression syntax.")))))))
+          (mapcan #'make-tool-descriptions
+                  *mcp-tools*)))
     (make-instance 'tools-list-response
                    :tools tools)))
 
-
-;; (defun register-mcp-methods (jsonrpc-server)
-;;   ;; (jsonrpc:expose server "rpc.discover"
-;;   ;;                 (lambda (args)
-;;   ;;                   (rpc-discover server args)))
-  
-;;   (jsonrpc:expose server "init"
-;;                   (lambda (args)
-;;                     (rpc-discover server args)))
-;;   )
 
 (defun handle-stdio-message (rpc-server message)
   (log:info "Handling" message)
   (let ((parsed-request
           (handler-case (jsonrpc:parse-message message)
             (jsonrpc:jsonrpc-error ()
-              (break)
               ;; Nothing can be done
               nil))))
     (cond
@@ -446,9 +622,7 @@
              (yason:encode response s)))))
       (t
        (log:error "No message was parsed, TBD: see how to return this error to the caller in MCP protocol.")
-       (values NIL))))
-  ;; (handle-message server message)
-  )
+       (values NIL)))))
 
 
 (defun start-server ()
@@ -461,14 +635,15 @@
     (setf (openrpc-server/api::api-server api)
           rpc-server)
 
-    (loop for name being the hash-key of (openrpc-server:api-methods api)
+    (loop for name being the hash-key of (api-methods api)
             using (hash-value method-info)
           do (jsonrpc:expose rpc-server name
-                             (openrpc-server/method::method-thunk method-info)))
+                             (method-thunk method-info)))
     
     (start-stdio-loop (make-instance 'stdio-transport)
                       (lambda (message)
                         (handle-stdio-message rpc-server message)))))
+
 
 (defmethod stop-server ((server mcp-server))
   "Stop the MCP server"
@@ -476,6 +651,7 @@
   (error "Not implemented yet")
   ;; (stop-stdio-loop (server-transport server))
   )
+
 
 ;; Convenience function for creating and starting a server
 

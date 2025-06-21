@@ -1,1 +1,1 @@
-{"method":"tools/call","params":{"name":"eval","arguments":{"form":"(* 2 2)"}},"jsonrpc":"2.0","id":2}
+{"method":"tools/call","params":{"name":"eval_lisp_form","arguments":{"form":"(* 2 2)"}},"jsonrpc":"2.0","id":2}

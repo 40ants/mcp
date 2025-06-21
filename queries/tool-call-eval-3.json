@@ -1,0 +1,1 @@
+{"method":"tools/call","params":{"name":"eval_lisp_form","arguments":{"form": "(defun calc-factorial (n) (if (<= n 1) 1 (* n (calc-factorial (- n 1)))))", "in_package": "cl-user"}},"jsonrpc":"2.0","id":2}

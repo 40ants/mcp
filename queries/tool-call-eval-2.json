@@ -1,0 +1,1 @@
+{"method":"tools/call","params":{"name":"eval_lisp_form","arguments":{"form":"(defun mapcar () NIL)"}},"jsonrpc":"2.0","id":2}
