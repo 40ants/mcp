@@ -17,6 +17,7 @@
                 #:defautodoc)
   (:export #:@index
            #:@readme
+           #:@about
            #:@changelog))
 (in-package #:40ants-mcp-docs/index)
 
@@ -31,7 +32,7 @@
   (ql:quickload "40ants-doc-theme-40ants")
   #-quicklisp
   (asdf:load-system "40ants-doc-theme-40ants")
-  
+
   (list :theme
         (find-symbol "40ANTS-THEME"
                      (find-package "40ANTS-DOC-THEME-40ANTS")))
@@ -54,19 +55,43 @@
                                    "URL"
                                    "URI"
                                    "RPC"
-                                   "GIT"))
+                                   "GIT"
+                                   "AI"
+                                   "CLOS"))
   (40ants-mcp system)
   "
 [![](https://github-actions.40ants.com/40ants/mcp/matrix.svg?only=ci.run-tests)](https://github.com/40ants/mcp/actions)
 
 ![Quicklisp](http://quickdocs.org/badge/40ants-mcp.svg)
 "
+  (@about section)
   (@installation section)
   (@usage section)
   (@api section))
 
 
 (defsection-copy @readme @index)
+
+
+(defsection @about (:title "About")
+  """
+A comprehensive framework for building [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) servers in Common Lisp. This library provides a complete implementation of the MCP specification with an easy-to-use API for creating servers that can interact with AI assistants like Claude Desktop.
+
+## Features
+
+- ✅ **STDIO Transport**: Native support for STDIO-based communication
+- ✅ **Tools System**: Register and execute custom tools with JSON Schema validation
+- ✅ **Built on OpenRPC**: Leverages the robust [40ants OpenRPC library](https://40ants.com/openrpc/)
+- ✅ **CLOS-based**: Object-oriented design with proper encapsulation
+- ✅ **Easy Integration**: Simple API for adding functionality
+- ✅ **Error Handling**: Comprehensive error management with proper JSON-RPC error codes
+
+## Roadmap
+
+- 🔄 **Full MCP Specification Support**: Complete implementation of MCP protocol version 2024-11-05
+- 🔄 **Resources System**: Serve dynamic and static resources via URI
+- 🔄 **Prompts System**: Provide prompt templates with argument interpolation
+""")
 
 
 (defsection @installation (:title "Installation")
