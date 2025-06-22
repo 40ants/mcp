@@ -77,6 +77,8 @@
   """
 A comprehensive framework for building [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) servers in Common Lisp. This library provides a complete implementation of the MCP specification with an easy-to-use API for creating servers that can interact with AI assistants like Claude Desktop.
 
+**Active development is ongoing and the interface is likely to change.**
+
 ## Features
 
 - ✅ **STDIO Transport**: Native support for STDIO-based communication
@@ -91,6 +93,7 @@ A comprehensive framework for building [Model Context Protocol (MCP)](https://mo
 - 🔄 **Full MCP Specification Support**: Complete implementation of MCP protocol version 2024-11-05
 - 🔄 **Resources System**: Serve dynamic and static resources via URI
 - 🔄 **Prompts System**: Provide prompt templates with argument interpolation
+- 🔄 **MCP Client Protocol**: Implement client-side protocol for connecting to MCP servers
 """)
 
 
