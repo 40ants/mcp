@@ -110,9 +110,72 @@ You can install this library from Quicklisp, but you want to receive updates qui
 
 
 (defsection @usage (:title "Usage")
-  "
-TODO: Write a library description. Put some examples here.
-")
+  """
+Here's a quick example of how to create an MCP server with custom tools:
+
+```lisp
+(defpackage #:my-mcp-server
+  (:use #:cl)
+  (:import-from #:40ants-mcp/content/text
+                #:text-content)
+  (:import-from #:openrpc-server))
+
+(in-package #:my-mcp-server)
+
+;; Define your API
+(openrpc-server:define-api (my-tools :title "My Custom Tools"))
+
+;; Define a tool that adds two numbers
+(openrpc-server:define-rpc-method (my-tools add) (a b)
+  (:summary "Adds two numbers and returns the result.")
+  (:param a integer "First number to add.")
+  (:param b integer "Second number to add.")
+  (:result (soft-list-of text-content))
+  (list (make-instance 'text-content
+                      :text (format nil "The sum of ~A and ~A is: ~A"
+                                  a b (+ a b)))))
+
+;; Start the server
+(40ants-mcp/server/definition:start-server my-tools)
+```
+
+### Running as a Script
+
+For production use, you can create a Roswell script. Create a file `my-mcp.ros`:
+
+```lisp
+#!/bin/sh
+#|-*- mode:lisp -*-|#
+#|
+exec ros -Q -- $0 \"$@\"
+|#
+
+(ql:quickload '(:40ants-mcp :alexandria) :silent t)
+
+;; Your package and tool definitions here...
+
+(defun main (&rest argv)
+  (declare (ignore argv))
+  (40ants-mcp/server/definition:start-server my-tools))
+```
+
+Build and run the script:
+
+```bash
+# Build the script
+ros build my-mcp.ros
+
+# Run the server
+./my-mcp
+
+# With remote debugging support
+SLYNK_PORT=4005 ./my-mcp
+```
+
+Each tool you define should return a list of content items. The most common content type is `text-content`, but you can also return other types defined in the MCP specification.
+
+For more examples, check the `examples/` directory in the source code.
+""")
 
 
 (defautodoc @api (:system "40ants-mcp"))

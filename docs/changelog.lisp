@@ -9,5 +9,5 @@
                               "ASDF"
                               "REPL"
                               "HTTP"))
-  (0.1.0 2023-02-05
-         "* Initial version."))
+  (0.1.0 2025-06-22
+         "* Initial version supporting STDIO and Tools."))
