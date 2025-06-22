@@ -40,6 +40,9 @@
 
 (defsection @index (:title "40ants-mcp - The framework for building MCP servers and clients in Common Lisp."
                     :ignore-words ("JSON"
+                                   "MCP"
+                                   "JSON-RPC"
+                                   "STDIO"
                                    "HTTP"
                                    "TODO"
                                    "Unlicense"

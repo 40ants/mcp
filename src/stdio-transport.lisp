@@ -4,6 +4,8 @@
   (:import-from #:alexandria)
   (:import-from #:log)
   (:import-from #:40ants-mcp/transport/base
+                #:send-message
+                #:receive-message
                 #:stop-loop
                 #:start-loop)
   (:export #:stdio-transport
@@ -36,7 +38,8 @@
     (write-line json-string (transport-output transport))
     (force-output (transport-output transport))
     ;; Log to stderr for debugging (not part of protocol)
-    (log:info "SENT: ~A" json-string)))
+    (log:info "SENT: ~A" json-string)
+    (values)))
 
 
 ;; TODO: remove after debug

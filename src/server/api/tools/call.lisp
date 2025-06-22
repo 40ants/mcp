@@ -23,16 +23,7 @@
                 #:tool-error-content
                 #:tool-error)
   (:import-from #:40ants-mcp/content/base
-                #:content)
-  (:export #:mcp-server
-           #:server-name
-           #:server-version
-           #:server-capabilities
-           #:add-tool
-           #:add-resource
-           #:add-prompt
-           #:start-server
-           #:stop-server))
+                #:content))
 (in-package #:40ants-mcp/server/api/tools/call)
 
 

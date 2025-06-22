@@ -21,16 +21,7 @@
                 #:sym-to-api-string)
   (:import-from #:40ants-mcp/server/definition
                 #:server-tools-collections
-                #:mcp-server)
-  (:export #:mcp-server
-           #:server-name
-           #:server-version
-           #:server-capabilities
-           #:add-tool
-           #:add-resource
-           #:add-prompt
-           #:start-server
-           #:stop-server))
+                #:mcp-server))
 (in-package #:40ants-mcp/server/api/tools/list)
 
 

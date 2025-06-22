@@ -28,14 +28,7 @@
   (:import-from #:40ants-mcp/transport/base
                 #:start-loop)
   (:export #:mcp-server
-           #:server-name
-           #:server-version
-           #:server-capabilities
-           #:add-tool
-           #:add-resource
-           #:add-prompt
            #:start-server
-           #:stop-server
            #:server-tools-collections))
 (in-package #:40ants-mcp/server/definition)
 
