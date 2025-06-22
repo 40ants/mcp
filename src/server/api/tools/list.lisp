@@ -27,32 +27,45 @@
 
 (defclass input-schema ()
   ((type :type string
-         :initform "object")
+         :initform "object"
+         :documentation "The JSON Schema type, always 'object' for tool input schemas.")
    (properties :type hash-table
-               :initarg :properties)
+               :initarg :properties
+               :documentation "Hash table mapping parameter names to their JSON Schema definitions.")
    (required :type (soft-list-of string)
              :initarg :required
-             :initform nil)))
+             :initform nil
+             :documentation "List of required parameter names."))
+  (:documentation "Represents the JSON Schema for a tool's input parameters."))
 
 
 (defclass tool-description ()
   ((name :type string
-         :initarg :name)
+         :initarg :name
+         :documentation "The unique name of the tool.")
    (description :type string
-                :initarg :description)
+                :initarg :description
+                :documentation "Human-readable description of what the tool does.")
    (|inputSchema| :type input-schema
-                  :initarg :input-schema)))
+                  :initarg :input-schema
+                  :documentation "JSON Schema describing the tool's input parameters."))
+  (:documentation "Describes a tool available in the MCP server.
+                  Tools are functions that can be called by the client to perform specific tasks."))
 
 
 (defclass tools-list-response ()
   ((tools :type (soft-list-of tool-description)
-          :initarg :tools)))
+          :initarg :tools
+          :documentation "List of available tools in the server."))
+  (:documentation "Response object for the tools/list RPC method."))
 
 
 (defclass tools-list-response-with-cursor (tools-list-response)
   ((|nextCursor| :type (or null string)
                  :initform nil
-                 :initarg :cursor)))
+                 :initarg :cursor
+                 :documentation "Optional cursor for pagination of large tool lists."))
+  (:documentation "Response object for the tools/list RPC method with pagination support."))
 
 
 (-> get-method-params (method-info)
@@ -62,7 +75,10 @@
 
 
 (defun get-method-params (method-info)
-  "Returns a hash-table describing methods and their type schemas and a list of required params."
+  "Extract parameter information from a method-info object.
+   Returns two values:
+   1. A hash-table mapping parameter names to their JSON Schema definitions
+   2. A list of required parameter names"
   (loop with results = (dict)
         with required = nil
         for param in (openrpc-server/method::method-params method-info)
@@ -84,6 +100,8 @@
     tool-description)
 
 (defun make-tool-description-for-method (method-name method-info)
+  "Create a tool-description object from a method name and its method-info.
+   The tool description includes the method's name, summary, and parameter schema."
   (multiple-value-bind (params required)
       (get-method-params method-info)
     (make-instance
@@ -100,6 +118,8 @@
     (soft-list-of tool-description))
 
 (defun make-tool-descriptions (rpc-server)
+  "Create tool descriptions for all methods in an RPC server.
+   Returns a list of tool-description objects."
   (loop for name being the hash-key of (api-methods rpc-server)
             using (hash-value method-info)
         collect (make-tool-description-for-method name
@@ -111,6 +131,8 @@
                 method-info)))
 
 (defun search-tool (tool-name tool-collections)
+  "Search for a tool by name across multiple tool collections.
+   Returns the method-info for the tool if found, NIL otherwise."
   (loop for collection in tool-collections
         for methods = (api-methods collection)
         for method = (gethash tool-name methods)
