@@ -1,295 +1,407 @@
-# 40ants-mcp: Model Context Protocol Server for Common Lisp
+<a id="x-2840ANTS-MCP-DOCS-2FINDEX-3A-40README-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29"></a>
 
-A comprehensive framework for building [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) servers in Common Lisp. This library provides a complete implementation of the MCP specification with an easy-to-use API for creating servers that can interact with AI assistants like Claude Desktop.
+# 40ants-mcp - The framework for building MCP servers and clients in Common Lisp.
 
-## Features
+<a id="40-ants-mcp-asdf-system-details"></a>
 
-- ✅ **Full MCP Specification Support**: Complete implementation of MCP protocol version 2024-11-05
-- ✅ **STDIO Transport**: Native support for STDIO-based communication
-- ✅ **Tools System**: Register and execute custom tools with JSON Schema validation
-- ✅ **Resources System**: Serve dynamic and static resources via URI
-- ✅ **Prompts System**: Provide prompt templates with argument interpolation
-- ✅ **Built on OpenRPC**: Leverages the robust [40ants OpenRPC library](https://40ants.com/openrpc/)
-- ✅ **CLOS-based**: Object-oriented design with proper encapsulation
-- ✅ **Easy Integration**: Simple API for adding functionality
-- ✅ **Error Handling**: Comprehensive error management with proper JSON-RPC error codes
+## 40ANTS-MCP ASDF System Details
+
+* Description: The framework for building `MCP` servers and clients in Common Lisp.
+* Licence: Unlicense
+* Author: Alexander Artemenko <svetlyak.40wt@gmail.com>
+* Homepage: [https://40ants.com/mcp/][7318]
+* Bug tracker: [https://github.com/40ants/mcp/issues][6ed2]
+* Source control: [GIT][e31f]
+* Depends on: [alexandria][8236], [bordeaux-threads][3dbf], [cl-ppcre][49b9], [jsonrpc][a9bd], [local-time][46a1], [log4cl][7f8b], [openrpc-client][b8fd], [openrpc-server][c8e7], [serapeum][c41d], [trivial-gray-streams][588d], [uuid][d6b3], [yason][aba2]
+
+[![](https://github-actions.40ants.com/40ants/mcp/matrix.svg?only=ci.run-tests)][04f0]
+
+![](http://quickdocs.org/badge/40ants-mcp.svg)
+
+<a id="x-2840ANTS-MCP-DOCS-2FINDEX-3A-40ABOUT-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29"></a>
+
+## About
+
+A comprehensive framework for building [Model Context Protocol (MCP)][473e] servers in Common Lisp. This library provides a complete implementation of the `MCP` specification with an easy-to-use `API` for creating servers that can interact with `AI` assistants like Claude Desktop.
+
+**Active development is ongoing and the interface is likely to change.**
+
+<a id="features"></a>
+
+### Features
+
+* ✅ **`STDIO` Transport**: Native support for `STDIO`-based communication
+* ✅ **Tools System**: Register and execute custom tools with `JSON` Schema validation
+* ✅ **Built on Open`RPC`**: Leverages the robust [40ants OpenRPC library][348e]
+* ✅ **`CLOS`-based**: Object-oriented design with proper encapsulation
+* ✅ **Easy Integration**: Simple `API` for adding functionality
+* ✅ **Error Handling**: Comprehensive error management with proper `JSON-RPC` error codes
+
+<a id="roadmap"></a>
+
+### Roadmap
+
+* 🔄 **Full `MCP` Specification Support**: Complete implementation of `MCP` protocol version 2024-11-05
+* 🔄 **Resources System**: Serve dynamic and static resources via `URI`
+* 🔄 **Prompts System**: Provide prompt templates with argument interpolation
+* 🔄 **`MCP` Client Protocol**: Implement client-side protocol for connecting to `MCP` servers
+
+<a id="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-40INSTALLATION-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29"></a>
 
 ## Installation
 
-### Prerequisites
+You can install this library from Quicklisp, but you want to receive updates quickly, then install it from Ultralisp.org:
 
-- SBCL or another Common Lisp implementation
-- Quicklisp
-- The [40ants OpenRPC library](https://40ants.com/openrpc/)
-- The [40ants-slynk library](https://40ants.com/slynk/) for remote debugging support
-- (Optional but recommended) [Roswell](https://github.com/roswell/roswell) for easier script management
-
-### Setup
-
-1. Clone this repository:
-```bash
-git clone https://github.com/40ants/mcp
-cd 40ants-mcp
 ```
-
-2. (Optional) Install Roswell for the best experience:
-```bash
-# On macOS with Homebrew
-brew install roswell
-
-# On Ubuntu/Debian
-curl -L https://raw.githubusercontent.com/roswell/roswell/release/scripts/install-for-ci.sh | sh
-
-# On other systems, see: https://github.com/roswell/roswell#installation
-```
-
-3. Load the system in your Lisp REPL:
-```lisp
+(ql-dist:install-dist "http://dist.ultralisp.org/"
+                      :prompt nil)
 (ql:quickload :40ants-mcp)
 ```
+<a id="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-40USAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29"></a>
 
-## Quick Start
+## Usage
 
-### Basic Server
+Here's a quick example of how to create an `MCP` server with custom tools:
 
 ```lisp
 (defpackage #:my-mcp-server
   (:use #:cl)
-  (:import-from #:40ants-mcp/core
-                #:mcp-server
-                #:add-tool
-                #:start-server))
+  (:import-from #:40ants-mcp/content/text
+                #:text-content)
+  (:import-from #:openrpc-server))
 
-(defun create-my-server ()
-  (let ((server (make-instance 'mcp-server
-                               :name "My MCP Server"
-                               :version "1.0.0")))
-    
-    ;; Add a simple tool
-    (add-tool server
-              "greet"
-              "Generate a greeting message"
-              ;; JSON Schema for input validation
-              '(("type" . "object")
-                ("properties" . (("name" . (("type" . "string")))))
-                ("required" . ("name")))
-              ;; Tool implementation function
-              (lambda (args)
-                (let ((name (getf args :|name|)))
-                  (list `(("type" . "text")
-                         ("text" . ,(format nil "Hello, ~A!" name)))))))
-    
-    server))
+(in-package #:my-mcp-server)
+
+;; Define your API
+(openrpc-server:define-api (my-tools :title "My Custom Tools"))
+
+;; Define a tool that adds two numbers
+(openrpc-server:define-rpc-method (my-tools add) (a b)
+  (:summary "Adds two numbers and returns the result.")
+  (:param a integer "First number to add.")
+  (:param b integer "Second number to add.")
+  (:result (soft-list-of text-content))
+  (list (make-instance 'text-content
+                      :text (format nil "The sum of ~A and ~A is: ~A"
+                                  a b (+ a b)))))
 
 ;; Start the server
-(start-server (create-my-server))
+(40ants-mcp/server/definition:start-server my-tools)
 ```
+<a id="running-as-a-script"></a>
 
-### Advanced Example
+### Running as a Script
 
-See `examples/simple-server.lisp` for a comprehensive example that includes:
-
-- Multiple tools with different input schemas
-- Resource serving (both static and dynamic content)
-- Prompt templates with arguments
-- Error handling demonstrations
-
-## API Reference
-
-### Core Classes
-
-#### `mcp-server`
-
-The main server class that handles MCP protocol communication.
-
-**Slots:**
-- `:name` - Server name (string)
-- `:version` - Server version (string) 
-- `:capabilities` - Server capabilities (hash table)
-
-**Methods:**
-- `add-tool (server name description schema function)` - Register a new tool
-- `add-resource (server uri name description mime-type function)` - Register a new resource
-- `add-prompt (server name description arguments function)` - Register a new prompt
-- `start-server (server)` - Start the server and begin processing requests
-
-### Tool Registration
+For production use, you can create a Roswell script. Create a file `my-mcp.ros`:
 
 ```lisp
-(add-tool server "tool-name" "Description" schema function)
+#!/bin/sh
+#|-*- mode:lisp -*-|#
+#|
+exec ros -Q -- $0 \"$@\"
+|#
+
+(ql:quickload '(:40ants-mcp :alexandria) :silent t)
+
+;; Your package and tool definitions here...
+
+(defun main (&rest argv)
+  (declare (ignore argv))
+  (40ants-mcp/server/definition:start-server my-tools))
 ```
-
-- `schema`: JSON Schema object defining input parameters
-- `function`: Lambda that receives parsed arguments and returns result
-
-**Tool Function Return Format:**
-```lisp
-;; Return a list of content items
-(list 
-  (alexandria:alist-hash-table
-    '(("type" . "text")
-      ("text" . "Tool result text"))))
-```
-
-### Resource Registration
-
-```lisp
-(add-resource server "file:///path" "Resource Name" "Description" "text/plain" function)
-```
-
-**Resource Function Return Format:**
-```lisp
-;; Return a list with resource content
-(list 
-  (alexandria:alist-hash-table
-    '(("uri" . "file:///path")
-      ("mimeType" . "text/plain")
-      ("text" . "Resource content"))))
-```
-
-### Prompt Registration
-
-```lisp
-(add-prompt server "prompt-name" "Description" arguments-schema function)
-```
-
-**Prompt Function Return Format:**
-```lisp
-;; Return a hash table with description and messages
-(alexandria:alist-hash-table
-  '(("description" . "Prompt description")
-    ("messages" . (list-of-message-objects))))
-```
-
-## Running the Example
-
-### Option 1: Traditional SBCL Script
-
-To run the included example server using SBCL:
+Build and run the script:
 
 ```bash
-./run-example.sh
+# Build the script
+ros build my-mcp.ros
+
+# Run the server
+./my-mcp
+
+# With remote debugging support
+SLYNK_PORT=4005 ./my-mcp
 ```
+Each tool you define should return a list of content items. The most common content type is `text-content`, but you can also return other types defined in the `MCP` specification.
 
-### Option 2: Roswell Script (Recommended)
+For more examples, check the `examples/` directory in the source code.
 
-If you have [Roswell](https://github.com/roswell/roswell) installed, you can run the server as a Roswell script:
+<a id="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-40API-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29"></a>
 
-```bash
-./examples/simple-server.ros
-```
+## API
 
-Or:
+<a id="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FCONTENT-2FBASE-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29"></a>
 
-```bash
-ros examples/simple-server.ros
-```
+### 40ANTS-MCP/CONTENT/BASE
 
-The Roswell version includes additional features:
-- Automatic dependency management via Quicklisp
-- Enhanced system information tools
-- Roswell environment inspection
-- Cross-platform compatibility
-- **SLYNK debugging support** via [40ants-slynk](https://40ants.com/slynk/)
+<a id="x-28-23A-28-2823-29-20BASE-CHAR-20-2E-20-2240ANTS-MCP-2FCONTENT-2FBASE-22-29-20PACKAGE-29"></a>
 
-Both versions will start a server with demonstration tools, resources, and prompts that you can test with any MCP client.
+#### [package](dd47) `40ants-mcp/content/base`
 
-### Remote Debugging with SLYNK
+<a id="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FCONTENT-2FBASE-3FClasses-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29"></a>
 
-The Roswell version supports remote debugging via SLYNK. Set the `SLYNK_PORT` environment variable to enable:
+#### Classes
 
-```bash
-# Start MCP server with SLYNK on port 4005 (localhost only)
-SLYNK_PORT=4005 ./examples/simple-server.ros
+<a id="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FCONTENT-2FBASE-24CONTENT-3FCLASS-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29"></a>
 
-# Start with SLYNK accessible from any interface
-SLYNK_PORT=4005 SLYNK_INTERFACE=0.0.0.0 ./examples/simple-server.ros
-```
+##### CONTENT
 
-Then connect from your favorite editor (Emacs with SLY, VSCode with Alive, etc.) to `localhost:4005` for interactive development and debugging.
+<a id="x-2840ANTS-MCP-2FCONTENT-2FBASE-3ACONTENT-20CLASS-29"></a>
 
-### Testing with Claude Desktop
+###### [class](83cb) `40ants-mcp/content/base:content` ()
 
-To use your MCP server with Claude Desktop, add it to your configuration:
+**Readers**
 
-```json
-{
-  "mcpServers": {
-    "my-lisp-server": {
-      "command": "/path/to/your/run-example.sh"
-    }
-  }
-}
-```
+<a id="x-2840ANTS-MCP-2FCONTENT-2FBASE-3ACONTENT-TYPE-20-2840ANTS-DOC-2FLOCATIVES-3AREADER-2040ANTS-MCP-2FCONTENT-2FBASE-3ACONTENT-29-29"></a>
 
-## Protocol Details
+###### [reader](97b7) `40ants-mcp/content/base:content-type` (content) (:TYPE = "unknown")
 
-### Supported MCP Methods
+<a id="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FCONTENT-2FTEXT-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29"></a>
 
-- `initialize` - Server initialization with capability negotiation
-- `tools/list` - List available tools
-- `tools/call` - Execute a specific tool
-- `resources/list` - List available resources  
-- `resources/read` - Read resource content
-- `prompts/list` - List available prompts
-- `prompts/get` - Get prompt with arguments
+### 40ANTS-MCP/CONTENT/TEXT
 
-### Transport
+<a id="x-28-23A-28-2823-29-20BASE-CHAR-20-2E-20-2240ANTS-MCP-2FCONTENT-2FTEXT-22-29-20PACKAGE-29"></a>
 
-The server uses STDIO transport as specified by the MCP protocol:
-- Receives JSON-RPC requests via stdin
-- Sends JSON-RPC responses via stdout  
-- Logs debug information to stderr
+#### [package](a7e6) `40ants-mcp/content/text`
 
-### Error Handling
+<a id="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FCONTENT-2FTEXT-3FClasses-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29"></a>
 
-The server properly handles and reports errors using standard JSON-RPC error codes:
-- `-32700` Parse error
-- `-32600` Invalid request
-- `-32601` Method not found
-- `-32602` Invalid params
-- `-32603` Internal error
+#### Classes
 
-## Development
+<a id="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FCONTENT-2FTEXT-24TEXT-CONTENT-3FCLASS-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29"></a>
 
-### Project Structure
+##### TEXT-CONTENT
 
-```
-src/
-├── core.lisp              # Main server implementation
-├── stdio-transport.lisp   # STDIO communication layer
-└── messages.lisp          # MCP message type definitions
+<a id="x-2840ANTS-MCP-2FCONTENT-2FTEXT-3ATEXT-CONTENT-20CLASS-29"></a>
 
-examples/
-├── simple-server.lisp     # Example server (traditional)
-└── simple-server.ros      # Example server (Roswell script)
+###### [class](3544) `40ants-mcp/content/text:text-content` (content)
 
-tests/
-└── (test files)           # Unit tests
+**Readers**
 
-plan.md                    # Implementation roadmap
-run-example.sh            # Script to run example server (SBCL)
-```
+<a id="x-2840ANTS-MCP-2FCONTENT-2FTEXT-3ACONTENT-TEXT-20-2840ANTS-DOC-2FLOCATIVES-3AREADER-2040ANTS-MCP-2FCONTENT-2FTEXT-3ATEXT-CONTENT-29-29"></a>
 
-### Contributing
+###### [reader](1f8a) `40ants-mcp/content/text:content-text` (text-content) (:text)
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests
-5. Submit a pull request
+<a id="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FSERVER-2FDEFINITION-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29"></a>
 
-### License
+### 40ANTS-MCP/SERVER/DEFINITION
 
-This project is licensed under the Unlicense - see the LICENSE file for details.
+<a id="x-28-23A-28-2828-29-20BASE-CHAR-20-2E-20-2240ANTS-MCP-2FSERVER-2FDEFINITION-22-29-20PACKAGE-29"></a>
 
-## Links
+#### [package](478f) `40ants-mcp/server/definition`
 
-- [Model Context Protocol Specification](https://modelcontextprotocol.io/specification/2024-11-05)
-- [40ants OpenRPC Library](https://40ants.com/openrpc/)
-- [MCP Official Documentation](https://modelcontextprotocol.io/)
-- [Claude Desktop MCP Guide](https://modelcontextprotocol.io/clients/claude-desktop)
+<a id="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FSERVER-2FDEFINITION-3FClasses-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29"></a>
 
-## Status
+#### Classes
 
-This is an alpha implementation. The core functionality is working, but some advanced features may still be in development. See `plan.md` for the complete roadmap and current progress.
+<a id="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FSERVER-2FDEFINITION-24MCP-SERVER-3FCLASS-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29"></a>
+
+##### MCP-SERVER
+
+<a id="x-2840ANTS-MCP-2FSERVER-2FDEFINITION-3AMCP-SERVER-20CLASS-29"></a>
+
+###### [class](301c) `40ants-mcp/server/definition:mcp-server` (api)
+
+**Readers**
+
+<a id="x-2840ANTS-MCP-2FSERVER-2FDEFINITION-3ASERVER-TOOLS-COLLECTIONS-20-2840ANTS-DOC-2FLOCATIVES-3AREADER-2040ANTS-MCP-2FSERVER-2FDEFINITION-3AMCP-SERVER-29-29"></a>
+
+###### [reader](9b3f) `40ants-mcp/server/definition:server-tools-collections` (mcp-server) (collections = nil)
+
+<a id="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FSERVER-2FDEFINITION-3FFunctions-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29"></a>
+
+#### Functions
+
+<a id="x-2840ANTS-MCP-2FSERVER-2FDEFINITION-3ASTART-SERVER-20FUNCTION-29"></a>
+
+##### [function](b0ae) `40ants-mcp/server/definition:start-server` tools-collections
+
+Start the `MCP` server
+
+<a id="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FSERVER-2FERRORS-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29"></a>
+
+### 40ANTS-MCP/SERVER/ERRORS
+
+<a id="x-28-23A-28-2824-29-20BASE-CHAR-20-2E-20-2240ANTS-MCP-2FSERVER-2FERRORS-22-29-20PACKAGE-29"></a>
+
+#### [package](acd4) `40ants-mcp/server/errors`
+
+<a id="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FSERVER-2FERRORS-3FClasses-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29"></a>
+
+#### Classes
+
+<a id="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FSERVER-2FERRORS-24TOOL-ERROR-3FCLASS-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29"></a>
+
+##### TOOL-ERROR
+
+<a id="x-2840ANTS-MCP-2FSERVER-2FERRORS-3ATOOL-ERROR-20CONDITION-29"></a>
+
+###### [condition](dcfa) `40ants-mcp/server/errors:tool-error` ()
+
+You should signal this error in case if the tool can't accomplish it's job.
+
+**Readers**
+
+<a id="x-2840ANTS-MCP-2FSERVER-2FERRORS-3ATOOL-ERROR-CONTENT-20-2840ANTS-DOC-2FLOCATIVES-3AREADER-2040ANTS-MCP-2FSERVER-2FERRORS-3ATOOL-ERROR-29-29"></a>
+
+###### [reader](dcfa) `40ants-mcp/server/errors:tool-error-content` (tool-error) (:content)
+
+<a id="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FSTDIO-TRANSPORT-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29"></a>
+
+### 40ANTS-MCP/STDIO-TRANSPORT
+
+<a id="x-28-23A-28-2826-29-20BASE-CHAR-20-2E-20-2240ANTS-MCP-2FSTDIO-TRANSPORT-22-29-20PACKAGE-29"></a>
+
+#### [package](ac3e) `40ants-mcp/stdio-transport`
+
+<a id="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FSTDIO-TRANSPORT-3FClasses-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29"></a>
+
+#### Classes
+
+<a id="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FSTDIO-TRANSPORT-24STDIO-TRANSPORT-3FCLASS-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29"></a>
+
+##### STDIO-TRANSPORT
+
+<a id="x-2840ANTS-MCP-2FSTDIO-TRANSPORT-3ASTDIO-TRANSPORT-20CLASS-29"></a>
+
+###### [class](6b69) `40ants-mcp/stdio-transport:stdio-transport` ()
+
+`STDIO` transport implementation for `MCP` (Model Context Protocol) communication.
+This class handles `JSON-RPC` message exchange via standard input/output streams.
+It is designed to work with the `MCP` protocol specification for `AI` model communication.
+
+**Readers**
+
+<a id="x-2840ANTS-MCP-2FSTDIO-TRANSPORT-3ATRANSPORT-INPUT-20-2840ANTS-DOC-2FLOCATIVES-3AREADER-2040ANTS-MCP-2FSTDIO-TRANSPORT-3ASTDIO-TRANSPORT-29-29"></a>
+
+###### [reader](1ae5) `40ants-mcp/stdio-transport:transport-input` (stdio-transport) (:input-stream = \*standard-input\*)
+
+Input stream for reading `JSON-RPC` messages. Defaults to *standard-input*.
+
+<a id="x-2840ANTS-MCP-2FSTDIO-TRANSPORT-3ATRANSPORT-OUTPUT-20-2840ANTS-DOC-2FLOCATIVES-3AREADER-2040ANTS-MCP-2FSTDIO-TRANSPORT-3ASTDIO-TRANSPORT-29-29"></a>
+
+###### [reader](cb09) `40ants-mcp/stdio-transport:transport-output` (stdio-transport) (:output-stream = \*standard-output\*)
+
+Output stream for writing `JSON-RPC` responses. Defaults to *standard-output*.
+
+<a id="x-2840ANTS-MCP-2FSTDIO-TRANSPORT-3ATRANSPORT-RUNNING-P-20-2840ANTS-DOC-2FLOCATIVES-3AREADER-2040ANTS-MCP-2FSTDIO-TRANSPORT-3ASTDIO-TRANSPORT-29-29"></a>
+
+###### [reader](cfcf) `40ants-mcp/stdio-transport:transport-running-p` (stdio-transport) (= t)
+
+Flag indicating if transport is active and processing messages.
+
+**Accessors**
+
+<a id="x-2840ANTS-MCP-2FSTDIO-TRANSPORT-3ATRANSPORT-INPUT-20-2840ANTS-DOC-2FLOCATIVES-3AACCESSOR-2040ANTS-MCP-2FSTDIO-TRANSPORT-3ASTDIO-TRANSPORT-29-29"></a>
+
+###### [accessor](1ae5) `40ants-mcp/stdio-transport:transport-input` (stdio-transport) (:input-stream = \*standard-input\*)
+
+Input stream for reading `JSON-RPC` messages. Defaults to *standard-input*.
+
+<a id="x-2840ANTS-MCP-2FSTDIO-TRANSPORT-3ATRANSPORT-OUTPUT-20-2840ANTS-DOC-2FLOCATIVES-3AACCESSOR-2040ANTS-MCP-2FSTDIO-TRANSPORT-3ASTDIO-TRANSPORT-29-29"></a>
+
+###### [accessor](cb09) `40ants-mcp/stdio-transport:transport-output` (stdio-transport) (:output-stream = \*standard-output\*)
+
+Output stream for writing `JSON-RPC` responses. Defaults to *standard-output*.
+
+<a id="x-2840ANTS-MCP-2FSTDIO-TRANSPORT-3ATRANSPORT-RUNNING-P-20-2840ANTS-DOC-2FLOCATIVES-3AACCESSOR-2040ANTS-MCP-2FSTDIO-TRANSPORT-3ASTDIO-TRANSPORT-29-29"></a>
+
+###### [accessor](cfcf) `40ants-mcp/stdio-transport:transport-running-p` (stdio-transport) (= t)
+
+Flag indicating if transport is active and processing messages.
+
+<a id="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FSTDIO-TRANSPORT-3FGenerics-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29"></a>
+
+#### Generics
+
+<a id="x-2840ANTS-MCP-2FTRANSPORT-2FBASE-3ARECEIVE-MESSAGE-20GENERIC-FUNCTION-29"></a>
+
+##### [generic-function](c7df) `40ants-mcp/transport/base:receive-message` transport
+
+Receive a `JSON-RPC` message, returns a message or `NIL`.
+
+<a id="x-2840ANTS-MCP-2FTRANSPORT-2FBASE-3ASEND-MESSAGE-20GENERIC-FUNCTION-29"></a>
+
+##### [generic-function](763f) `40ants-mcp/transport/base:send-message` transport message
+
+Send a `JSON-RPC` message, returns no values.
+
+<a id="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FTRANSPORT-2FBASE-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29"></a>
+
+### 40ANTS-MCP/TRANSPORT/BASE
+
+<a id="x-28-23A-28-2825-29-20BASE-CHAR-20-2E-20-2240ANTS-MCP-2FTRANSPORT-2FBASE-22-29-20PACKAGE-29"></a>
+
+#### [package](4dc4) `40ants-mcp/transport/base`
+
+<a id="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FTRANSPORT-2FBASE-3FGenerics-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29"></a>
+
+#### Generics
+
+<a id="x-2840ANTS-MCP-2FTRANSPORT-2FBASE-3ARECEIVE-MESSAGE-20GENERIC-FUNCTION-29"></a>
+
+##### [generic-function](c7df) `40ants-mcp/transport/base:receive-message` transport
+
+Receive a `JSON-RPC` message, returns a message or `NIL`.
+
+<a id="x-2840ANTS-MCP-2FTRANSPORT-2FBASE-3ASEND-MESSAGE-20GENERIC-FUNCTION-29"></a>
+
+##### [generic-function](763f) `40ants-mcp/transport/base:send-message` transport message
+
+Send a `JSON-RPC` message, returns no values.
+
+<a id="x-2840ANTS-MCP-2FTRANSPORT-2FBASE-3ASTART-LOOP-20GENERIC-FUNCTION-29"></a>
+
+##### [generic-function](1ab2) `40ants-mcp/transport/base:start-loop` transport message-handler
+
+Starts message processing using given transport.
+
+<a id="x-2840ANTS-MCP-2FTRANSPORT-2FBASE-3ASTOP-LOOP-20GENERIC-FUNCTION-29"></a>
+
+##### [generic-function](0959) `40ants-mcp/transport/base:stop-loop` transport
+
+Stops message processing using given transport.
+
+
+[7318]: https://40ants.com/mcp/
+[348e]: https://40ants.com/openrpc/
+[e31f]: https://github.com/40ants/mcp
+[04f0]: https://github.com/40ants/mcp/actions
+[dd47]: https://github.com/40ants/mcp/blob/a5a1ce6e5a2cd99dbfdd64dd43399b64646755ef/src/content/base.lisp#L1
+[83cb]: https://github.com/40ants/mcp/blob/a5a1ce6e5a2cd99dbfdd64dd43399b64646755ef/src/content/base.lisp#L8
+[97b7]: https://github.com/40ants/mcp/blob/a5a1ce6e5a2cd99dbfdd64dd43399b64646755ef/src/content/base.lisp#L9
+[a7e6]: https://github.com/40ants/mcp/blob/a5a1ce6e5a2cd99dbfdd64dd43399b64646755ef/src/content/text.lisp#L1
+[3544]: https://github.com/40ants/mcp/blob/a5a1ce6e5a2cd99dbfdd64dd43399b64646755ef/src/content/text.lisp#L11
+[1f8a]: https://github.com/40ants/mcp/blob/a5a1ce6e5a2cd99dbfdd64dd43399b64646755ef/src/content/text.lisp#L12
+[478f]: https://github.com/40ants/mcp/blob/a5a1ce6e5a2cd99dbfdd64dd43399b64646755ef/src/server/definition.lisp#L1
+[301c]: https://github.com/40ants/mcp/blob/a5a1ce6e5a2cd99dbfdd64dd43399b64646755ef/src/server/definition.lisp#L36
+[9b3f]: https://github.com/40ants/mcp/blob/a5a1ce6e5a2cd99dbfdd64dd43399b64646755ef/src/server/definition.lisp#L37
+[b0ae]: https://github.com/40ants/mcp/blob/a5a1ce6e5a2cd99dbfdd64dd43399b64646755ef/src/server/definition.lisp#L72
+[acd4]: https://github.com/40ants/mcp/blob/a5a1ce6e5a2cd99dbfdd64dd43399b64646755ef/src/server/errors.lisp#L1
+[dcfa]: https://github.com/40ants/mcp/blob/a5a1ce6e5a2cd99dbfdd64dd43399b64646755ef/src/server/errors.lisp#L10
+[ac3e]: https://github.com/40ants/mcp/blob/a5a1ce6e5a2cd99dbfdd64dd43399b64646755ef/src/stdio-transport.lisp#L1
+[6b69]: https://github.com/40ants/mcp/blob/a5a1ce6e5a2cd99dbfdd64dd43399b64646755ef/src/stdio-transport.lisp#L19
+[1ae5]: https://github.com/40ants/mcp/blob/a5a1ce6e5a2cd99dbfdd64dd43399b64646755ef/src/stdio-transport.lisp#L20
+[cb09]: https://github.com/40ants/mcp/blob/a5a1ce6e5a2cd99dbfdd64dd43399b64646755ef/src/stdio-transport.lisp#L24
+[cfcf]: https://github.com/40ants/mcp/blob/a5a1ce6e5a2cd99dbfdd64dd43399b64646755ef/src/stdio-transport.lisp#L28
+[4dc4]: https://github.com/40ants/mcp/blob/a5a1ce6e5a2cd99dbfdd64dd43399b64646755ef/src/transport/base.lisp#L1
+[1ab2]: https://github.com/40ants/mcp/blob/a5a1ce6e5a2cd99dbfdd64dd43399b64646755ef/src/transport/base.lisp#L10
+[0959]: https://github.com/40ants/mcp/blob/a5a1ce6e5a2cd99dbfdd64dd43399b64646755ef/src/transport/base.lisp#L14
+[c7df]: https://github.com/40ants/mcp/blob/a5a1ce6e5a2cd99dbfdd64dd43399b64646755ef/src/transport/base.lisp#L18
+[763f]: https://github.com/40ants/mcp/blob/a5a1ce6e5a2cd99dbfdd64dd43399b64646755ef/src/transport/base.lisp#L22
+[6ed2]: https://github.com/40ants/mcp/issues
+[473e]: https://modelcontextprotocol.io/
+[8236]: https://quickdocs.org/alexandria
+[3dbf]: https://quickdocs.org/bordeaux-threads
+[49b9]: https://quickdocs.org/cl-ppcre
+[a9bd]: https://quickdocs.org/jsonrpc
+[46a1]: https://quickdocs.org/local-time
+[7f8b]: https://quickdocs.org/log4cl
+[b8fd]: https://quickdocs.org/openrpc-client
+[c8e7]: https://quickdocs.org/openrpc-server
+[c41d]: https://quickdocs.org/serapeum
+[588d]: https://quickdocs.org/trivial-gray-streams
+[d6b3]: https://quickdocs.org/uuid
+[aba2]: https://quickdocs.org/yason
+
+* * *
+###### [generated by [40ANTS-DOC](https://40ants.com/doc/)]
