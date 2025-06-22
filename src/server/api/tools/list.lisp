@@ -3,6 +3,7 @@
   (:import-from #:openrpc-server
                 #:api-methods)
   (:import-from #:openrpc-server/method
+                #:method-summary
                 #:method-info
                 #:method-thunk)
   (:import-from #:openrpc-server/discovery
@@ -111,7 +112,7 @@
     (make-instance
      'tool-description
      :name method-name
-     :description "Evaluates given Lisp form and returns from a list of values."
+     :description (method-summary method-info)
      :input-schema (make-instance
                     'input-schema
                     :properties params

@@ -4,19 +4,17 @@
 exec ros -Q -- $0 "$@"
 |#
 
-;;;; Simple MCP Server Example - Roswell Script Version
+;;;; Dev MCP Server
 ;;;;
-;;;; This example demonstrates how to create a basic MCP server
-;;;; with tools, resources, and prompts using the 40ants-mcp framework
+;;;; This file demonstrates how to create a basic MCP server
 ;;;; and run it as a Roswell script.
 ;;;;
 ;;;; Usage:
-;;;;   ./simple-server.ros
-;;;;   ros simple-server.ros
+;;;;   ./dev-server.ros
+;;;;   ros dev-server.ros
 ;;;;
 ;;;; With SLYNK support for remote debugging:
-;;;;   SLYNK_PORT=4005 ./simple-server.ros
-;;;;   SLYNK_PORT=4005 SLYNK_INTERFACE=0.0.0.0 ./simple-server.ros
+;;;;   SLYNK_PORT=4005 ./lisp-dev-mcp.ros
 
 ;; Load required systems
 (push "~/projects/lisp/40ants-logging/" asdf:*central-registry*)
@@ -27,7 +25,7 @@ exec ros -Q -- $0 "$@"
 
 (ql:quickload '(:40ants-mcp :alexandria :local-time :40ants-slynk) :silent t)
 
-(defpackage #:simple-mcp-server
+(defpackage #:dev-mcp-server
   (:use #:cl)
   (:import-from #:40ants-mcp)
   (:import-from #:40ants-logging)
@@ -42,13 +40,13 @@ exec ros -Q -- $0 "$@"
   (:import-from #:40ants-mcp/content/text
                 #:text-content)
   (:export #:main))
-(in-package #:simple-mcp-server)
+(in-package #:dev-mcp-server)
 
 
-(openrpc-server:define-api (example-tools :title "Example tools"))
+(openrpc-server:define-api (dev-tools :title "Lisp dev tools"))
 
 
-(openrpc-server:define-rpc-method (example-tools eval-lisp-form) (form &key (in-package "CL-USER"))
+(openrpc-server:define-rpc-method (dev-tools eval-lisp-form) (form &key (in-package "CL-USER"))
   (:summary "Evaluates a given Lisp form and returns a list of values.
 
              Only one lisp form should be provided as the input.
@@ -129,7 +127,7 @@ exec ros -Q -- $0 "$@"
 
   (40ants-logging:setup-for-backend
    :filename (make-pathname :directory '(:absolute "tmp")
-                            :name "example-mcp"
+                            :name "lisp-dev-mcp"
                             :type "log")
    :level :debug)
 
@@ -138,7 +136,7 @@ exec ros -Q -- $0 "$@"
 
   (setf jsonrpc/errors:*debug-on-error* t)
 
-  (log:info "Starting Simple MCP Server Example (Roswell Script)...")
+  (log:info "Starting Dev MCP Server")
   (log:info "Lisp: ~A ~A" (lisp-implementation-type) (lisp-implementation-version))
   (log:info "Roswell: ~A" (or (uiop:getenv "ROSWELL_VERSION") "Unknown"))
-  (40ants-mcp/server/definition:start-server example-tools))
+  (40ants-mcp/server/definition:start-server dev-tools))
