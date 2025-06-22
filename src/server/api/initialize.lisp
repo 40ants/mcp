@@ -13,16 +13,7 @@
   (:import-from #:serapeum
                 #:dict)
   (:import-from #:40ants-mcp/server/definition
-                #:mcp-server)
-  (:export #:mcp-server
-           #:server-name
-           #:server-version
-           #:server-capabilities
-           #:add-tool
-           #:add-resource
-           #:add-prompt
-           #:start-server
-           #:stop-server))
+                #:mcp-server))
 (in-package #:40ants-mcp/server/api/initialize)
 
 

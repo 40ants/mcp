@@ -5,3 +5,5 @@
 *.fasl
 .*.~undo-tree~
 /examples/simple-server
+/examples/example-mcp
+/examples/lisp-dev-mcp

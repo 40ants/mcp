@@ -1,0 +1,10 @@
+---
+description:
+globs: *.ros
+alwaysApply: false
+---
+After you change roswell script, build a binary using command like this:
+
+```
+qlot exec ros build examples/lisp-dev-mcp.ros
+```

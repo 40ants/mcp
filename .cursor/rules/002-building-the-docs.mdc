@@ -1,0 +1,17 @@
+---
+description:
+globs: *.lisp
+alwaysApply: false
+---
+AWAYS, when you change docstrings in the exported lisp functions or classes or any lisp file inside `docs/` folder, build the documentation and ensure there is no warnings.
+
+# How to build documentation
+
+1. Ensure there is `DOCS-BUILDER` lisp package available. If not, then install `docs-builder` using quicklisp.
+2. Build documentation using a command like this `(docs-builder:build "a-system-name-docs" :local t)` where `a-system-name-docs` should correspond a name of the file in the project root - ie, in this example there should be a file `a-system-name-docs.asd` in the root folder.
+3. If there are some errors or warnings in the build log, show them to me and ask how to fix them.
+4. Remember how we fix typical errors in the documentation in your persistent memory, and use this knowledge to fix similar problems automatically in future.
+
+# Updating the documentation
+
+**Important rule**: When you change any lisp file, do load the lisp library again before building the documentation.
