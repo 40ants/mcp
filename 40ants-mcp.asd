@@ -10,15 +10,19 @@
   :defsystem-depends-on ("40ants-asdf-system")
   :pathname "src"
   :depends-on ("40ants-mcp/core"
-               "openrpc-server"       ; JSON-RPC foundation
-               "openrpc-client"       ; For testing and client features
-               "yason"                ; JSON handling (already used by openrpc)
-               "bordeaux-threads"     ; Threading for STDIO transport
-               "trivial-gray-streams" ; For STDIO stream handling
-               "alexandria"           ; Utilities
-               "local-time"           ; Timestamps
-               "uuid"                 ; Request IDs
-               "cl-ppcre"             ; Pattern matching
+               "40ants-mcp/server/api/initialize"
+               "40ants-mcp/server/api/tools/list"
+               "40ants-mcp/server/api/tools/call"
+               "40ants-mcp/content/text"
+               "openrpc-server"         ; JSON-RPC foundation
+               "openrpc-client"         ; For testing and client features
+               "yason"                  ; JSON handling (already used by openrpc)
+               "bordeaux-threads"       ; Threading for STDIO transport
+               "trivial-gray-streams"   ; For STDIO stream handling
+               "alexandria"             ; Utilities
+               "local-time"             ; Timestamps
+               "uuid"                   ; Request IDs
+               "cl-ppcre"               ; Pattern matching
                "log4cl")              ; Logging
   :in-order-to ((test-op (test-op "40ants-mcp-tests"))))
 

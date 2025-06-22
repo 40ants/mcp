@@ -1,6 +1,5 @@
 (uiop:define-package #:40ants-mcp/stdio-transport
   (:use #:cl)
-  (:import-from #:jsonrpc)
   (:import-from #:yason)
   (:import-from #:alexandria)
   (:import-from #:log)

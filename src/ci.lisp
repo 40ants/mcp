@@ -18,7 +18,9 @@
   :jobs ((40ants-ci/jobs/linter:linter
           :asdf-systems ("40ants-mcp"
                          "40ants-mcp-docs"
-                         "40ants-mcp-tests"))))
+                         "40ants-mcp-tests")
+          :check-imports t)))
+
 
 (defworkflow docs
   :on-push-to "master"

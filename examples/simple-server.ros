@@ -29,202 +29,98 @@ exec ros -Q -- $0 "$@"
 
 (defpackage #:simple-mcp-server
   (:use #:cl)
-  (:import-from #:40ants-mcp/core
-                #:mcp-server
-                #:add-tool
-                #:add-resource
-                #:add-prompt
-                #:start-server)
+  (:import-from #:40ants-mcp)
   (:import-from #:40ants-logging)
+  (:import-from #:serapeum
+                #:fmt)
+  (:import-from #:openrpc-server)
   (:import-from #:jsonrpc/errors)
   (:import-from #:log :info)
   (:import-from #:40ants-slynk
                 #:start-slynk-if-needed)
   (:import-from #:alexandria)
+  (:import-from #:40ants-mcp/content/text
+                #:text-content)
   (:export #:main))
 (in-package #:simple-mcp-server)
 
-(defun create-example-server ()
-  "Create an example MCP server with some demo tools, resources, and prompts"
-  (let ((server nil
-          ;; (make-instance 'mcp-server
-          ;;                :name "Simple Example Server (Roswell)"
-          ;;                :version "1.0.0")
-          ))
 
-    ;; Add some example tools
-    ;; (add-tool server
-    ;;           "echo"
-    ;;           "Echo back the provided text"
-    ;;           (alexandria:alist-hash-table
-    ;;            '(("type" . "object")
-    ;;              ("properties" . (("text" . (("type" . "string")
-    ;;                                          ("description" . "Text to echo back")))))
-    ;;              ("required" . ("text"))))
-    ;;           (lambda (args)
-    ;;             (let ((text (getf args :|text|)))
-    ;;               (list (alexandria:alist-hash-table
-    ;;                      `(("type" . "text")
-    ;;                        ("text" . ,(format nil "Echo: ~A" text))))))))
+(openrpc-server:define-api (example-tools :title "Example tools"))
 
-    ;; (add-tool server
-    ;;           "add_numbers"
-    ;;           "Add two numbers together"
-    ;;           (alexandria:alist-hash-table
-    ;;            '(("type" . "object")
-    ;;              ("properties" . (("a" . (("type" . "number")
-    ;;                                       ("description" . "First number")))
-    ;;                               ("b" . (("type" . "number")
-    ;;                                       ("description" . "Second number")))))
-    ;;              ("required" . ("a" "b"))))
-    ;;           (lambda (args)
-    ;;             (let ((a (getf args :|a|))
-    ;;                   (b (getf args :|b|)))
-    ;;               (list (alexandria:alist-hash-table
-    ;;                      `(("type" . "text")
-    ;;                        ("text" . ,(format nil "~A + ~A = ~A" a b (+ a b)))))))))
 
-    ;; (add-tool server
-    ;;           "current_time"
-    ;;           "Get the current date and time"
-    ;;           (alexandria:alist-hash-table
-    ;;            '(("type" . "object")
-    ;;              ("properties" . ())
-    ;;              ("required" . ())))
-    ;;           (lambda (args)
-    ;;             (declare (ignore args))
-    ;;             (list (alexandria:alist-hash-table
-    ;;                    `(("type" . "text")
-    ;;                      ("text" . ,(format nil "Current time: ~A"
-    ;;                                         (local-time:format-timestring
-    ;;                                          nil (local-time:now)))))))))
+(openrpc-server:define-rpc-method (example-tools eval-lisp-form) (form &key (in-package "CL-USER"))
+  (:summary "Evaluates a given Lisp form and returns a list of values.
 
-;;     (add-tool server
-;;               "system_info"
-;;               "Get information about the Lisp system and Roswell environment"
-;;               (alexandria:alist-hash-table
-;;                '(("type" . "object")
-;;                  ("properties" . ())
-;;                  ("required" . ())))
-;;               (lambda (args)
-;;                 (declare (ignore args))
-;;                 (let ((slynk-port (uiop:getenv "SLYNK_PORT"))
-;;                       (slynk-interface (uiop:getenv "SLYNK_INTERFACE")))
-;;                   (list (alexandria:alist-hash-table
-;;                          `(("type" . "text")
-;;                            ("text" . ,(format nil "Lisp: ~A ~A~%Roswell: ~A~%SLYNK: ~A~%Features: ~A"
-;;                                               (lisp-implementation-type)
-;;                                               (lisp-implementation-version)
-;;                                               (or (uiop:getenv "ROSWELL_VERSION") "Unknown")
-;;                                               (if slynk-port
-;;                                                   (format nil "Available on ~A:~A"
-;;                                                           (or slynk-interface "localhost")
-;;                                                           slynk-port)
-;;                                                   "Not configured (set SLYNK_PORT to enable)")
-;;                                               (mapcar #'string *features*)))))))
+             Only one lisp form should be provided as the input.
+             If you need to eval a multiple forms, wrap them into
+             a PROGN or a similar form.
 
-;;                 ;; Add some example resources
-;;                 (add-resource server
-;;                               "file:///example.txt"
-;;                               "Example Text File"
-;;                               "A simple example text file"
-;;                               "text/plain"
-;;                               (lambda (uri)
-;;                                 (declare (ignore uri))
-;;                                 (list (alexandria:alist-hash-table
-;;                                        '(("uri" . "file:///example.txt")
-;;                                          ("mimeType" . "text/plain")
-;;                                          ("text" . "This is an example text file content.
-;; It demonstrates how resources work in MCP.
-;; You can return any kind of content here.
-;; This server is running as a Roswell script!"))))))
+             A multiple values can be returned. Each value is printed in it's own
+             section with a title like VALUE-1, VALUE-2 and so on.
 
-;;                 (add-resource server
-;;                               "memory://server-stats"
-;;                               "Server Statistics"
-;;                               "Current server statistics and information"
-;;                               "application/json"
-;;                               (lambda (uri)
-;;                                 (declare (ignore uri))
-;;                                 (list (alexandria:alist-hash-table
-;;                                        `(("uri" . "memory://server-stats")
-;;                                          ("mimeType" . "application/json")
-;;                                          ("text" . ,(format nil "{
-;;   \"server_name\": \"~A\",
-;;   \"uptime\": \"~A seconds\",
-;;   \"tools_count\": ~A,
-;;   \"resources_count\": ~A,
-;;   \"prompts_count\": ~A,
-;;   \"lisp_implementation\": \"~A ~A\",
-;;   \"roswell_version\": \"~A\"
-;; }"
-;;                                                             "Simple Example Server (Roswell)"
-;;                                                             (get-universal-time)
-;;                                                             (hash-table-count (slot-value server '40ants-mcp/core::tools))
-;;                                                             (hash-table-count (slot-value server '40ants-mcp/core::resources))
-;;                                                             (hash-table-count (slot-value server '40ants-mcp/core::prompts))
-;;                                                             (lisp-implementation-type)
-;;                                                             (lisp-implementation-version)
-;;                                                             (or (uiop:getenv "ROSWELL_VERSION") "Unknown"))))))))
+             Also this tool returns STDOUT and STDERR if something was written to these streams.
 
-;;                 (add-resource server
-;;                               "roswell://environment"
-;;                               "Roswell Environment"
-;;                               "Information about the current Roswell environment"
-;;                               "text/plain"
-;;                               (lambda (uri)
-;;                                 (declare (ignore uri))
-;;                                 (let ((ros-home (uiop:getenv "ROSWELL_HOME"))
-;;                                       (ros-version (uiop:getenv "ROSWELL_VERSION"))
-;;                                       (ros-lisp (uiop:getenv "ROSWELL_LISP")))
-;;                                   (list (alexandria:alist-hash-table
-;;                                          `(("uri" . "roswell://environment")
-;;                                            ("mimeType" . "text/plain")
-;;                                            ("text" . ,(format nil "Roswell Environment Information:
-;; ROSWELL_HOME: ~A
-;; ROSWELL_VERSION: ~A
-;; ROSWELL_LISP: ~A
-;; Current Lisp: ~A ~A
-;; Script Path: ~A
-;; "
-;;                                                               (or ros-home "Not set")
-;;                                                               (or ros-version "Not set")
-;;                                                               (or ros-lisp "Not set")
-;;                                                               (lisp-implementation-type)
-;;                                                               (lisp-implementation-version)
-;;                                                               (or (first sb-ext:*posix-argv*) "Unknown")))))))))
+             In case of an error, the ERROR result with a backtrace will be returned.
 
-;;                 ;; Add some example prompts
-;;                 (add-prompt server
-;;                             "greeting"
-;;                             "Generate a personalized greeting"
-;;                             (alexandria:alist-hash-table
-;;                              '(("type" . "object")
-;;                                ("properties" . (("name" . (("type" . "string")
-;;                                                            ("description" . "Name of the person to greet")))
-;;                                                 ("style" . (("type" . "string")
-;;                                                             ("enum" . ("formal" "casual" "friendly"))
-;;                                                             ("description" . "Style of greeting")))))
-;;                                ("required" . ("name"))))
-;;                             (lambda (args)
-;;                               (let ((name (getf args :|name|))
-;;                                     (style (getf args :|style| "friendly")))
-;;                                 (let ((greeting
-;;                                         (cond
-;;                                           ((string= style "formal")
-;;                                            (format nil "Good day, ~A. I hope this message finds you well." name))
-;;                                           ((string= style "casual")
-;;                                            (format nil "Hey ~A! What's up?" name))
-;;                                           (t
-;;                                            (format nil "Hello ~A! Nice to meet you!" name)))))
-;;                                   (alexandria:alist-hash-table
-;;                                    `(("description" . ,(format nil "A ~A greeting for ~A" style name))
-;;                                      ("messages" . ,(list (alexandria:alist-hash-table
-;;                                                            `(("role" . "assistant")
-;;                                                              ("content" . (("type" . "text")
-;;                                                                            ("text" . ,greeting)))))))))))))))
+             If you need to evaluate form in context of some package other than CL-USER,
+             then pass package name in IN-PACKAGE argument.
+             All FORM symbols without package qualifier, will be interned into this package.")
+  (:param form string "Lisp form to be evaluated, in the s-expression syntax.")
+  (:param in-package string "Common Lisp package name to evaluate form in.")
+  (:result (soft-list-of text-content))
 
-    server))
+  (block func
+    (with-output-to-string (*standard-output*)
+      (with-output-to-string (*error-output*)
+        (flet ((make-output-results ()
+                 (let ((stdout (str:trim (get-output-stream-string *standard-output*)))
+                       (stderr (str:trim (get-output-stream-string *error-output*))))
+                   (append (unless (str:emptyp stdout)
+                             (list (make-instance 'text-content
+                                                  :text (fmt "## STDOUT~2%~A"
+                                                             stdout))))
+                           (unless (str:emptyp stderr)
+                             (list (make-instance 'text-content
+                                                  :text (fmt "## STDERR~2%~A"
+                                                             stderr))))))))
+          (let* ((result-values
+                   (multiple-value-list
+                    (handler-bind ((serious-condition
+                                     (lambda (c)
+                                       (let ((error-message
+                                               (with-output-to-string (s)
+                                                 (format s "## ERROR~2%")
+                                                 (trivial-backtrace:print-condition c s))))
+                                         (error 'tool-error
+                                                :content (list* (make-instance 'text-content
+                                                                               :text error-message)
+                                                                (make-output-results)))))))
+                      (let* ((*package* (or (find-package in-package)
+                                            (find-package (string-upcase in-package))
+                                            (error 'tool-error
+                                                   :content (list* (make-instance 'text-content
+                                                                                  :text (fmt "Package \"~A\" was not found."
+                                                                                             in-package))))))
+                             (package-name (package-name *package*))
+                             (forms (uiop:with-safe-io-syntax (:package package-name)
+                                      (with-input-from-string (s form)
+                                        (uiop:slurp-stream-forms s))))
+                             ;; To allow eval multiple forms, we need to wrap
+                             ;; them with PROGN:
+                             (expression
+                               (list* 'progn
+                                      forms)))
+                        (eval expression))))))
+
+            (return-from func
+              (append
+               (loop for value in result-values
+                     for idx upfrom 1
+                     collect (make-instance 'text-content
+                                            :text (fmt "## VALUE-~A~2%~A"
+                                                       idx
+                                                       value)))
+               (make-output-results)))))))))
 
 
 (defun main (&rest argv)
@@ -242,11 +138,7 @@ exec ros -Q -- $0 "$@"
 
   (setf jsonrpc/errors:*debug-on-error* t)
 
-  ;; (let ((server (create-example-server))))
   (log:info "Starting Simple MCP Server Example (Roswell Script)...")
   (log:info "Lisp: ~A ~A" (lisp-implementation-type) (lisp-implementation-version))
   (log:info "Roswell: ~A" (or (uiop:getenv "ROSWELL_VERSION") "Unknown"))
-  (log:info "Available tools: echo, add_numbers, current_time, system_info")
-  (log:info "Available resources: file:///example.txt, memory://server-stats, roswell://environment")
-  (log:info "Available prompts: greeting, roswell_script_template")
-  (start-server))
+  (40ants-mcp/server/definition:start-server example-tools))
