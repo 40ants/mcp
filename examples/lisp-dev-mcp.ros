@@ -16,6 +16,8 @@ exec ros -Q -- $0 "$@"
 ;;;; With SLYNK support for remote debugging:
 ;;;;   SLYNK_PORT=4005 ./lisp-dev-mcp.ros
 
+(declaim (optimize (debug 3) (safety 3)))
+
 ;; Load required systems
 (push "~/projects/lisp/40ants-logging/" asdf:*central-registry*)
 (push "~/projects/lisp/40ants-openrpc/" asdf:*central-registry*)
@@ -39,6 +41,8 @@ exec ros -Q -- $0 "$@"
   (:import-from #:alexandria)
   (:import-from #:40ants-mcp/content/text
                 #:text-content)
+  (:import-from #:40ants-mcp/server/errors
+                #:tool-error)
   (:export #:main))
 (in-package #:dev-mcp-server)
 
@@ -68,57 +72,59 @@ exec ros -Q -- $0 "$@"
   (:result (soft-list-of text-content))
 
   (block func
-    (with-output-to-string (*standard-output*)
-      (with-output-to-string (*error-output*)
-        (flet ((make-output-results ()
-                 (let ((stdout (str:trim (get-output-stream-string *standard-output*)))
-                       (stderr (str:trim (get-output-stream-string *error-output*))))
-                   (append (unless (str:emptyp stdout)
-                             (list (make-instance 'text-content
-                                                  :text (fmt "## STDOUT~2%~A"
-                                                             stdout))))
-                           (unless (str:emptyp stderr)
-                             (list (make-instance 'text-content
-                                                  :text (fmt "## STDERR~2%~A"
-                                                             stderr))))))))
-          (let* ((result-values
-                   (multiple-value-list
-                    (handler-bind ((serious-condition
-                                     (lambda (c)
-                                       (let ((error-message
-                                               (with-output-to-string (s)
-                                                 (format s "## ERROR~2%")
-                                                 (trivial-backtrace:print-condition c s))))
-                                         (error 'tool-error
-                                                :content (list* (make-instance 'text-content
-                                                                               :text error-message)
-                                                                (make-output-results)))))))
-                      (let* ((*package* (or (find-package in-package)
-                                            (find-package (string-upcase in-package))
-                                            (error 'tool-error
-                                                   :content (list* (make-instance 'text-content
-                                                                                  :text (fmt "Package \"~A\" was not found."
-                                                                                             in-package))))))
-                             (package-name (package-name *package*))
-                             (forms (uiop:with-safe-io-syntax (:package package-name)
-                                      (with-input-from-string (s form)
-                                        (uiop:slurp-stream-forms s))))
-                             ;; To allow eval multiple forms, we need to wrap
-                             ;; them with PROGN:
-                             (expression
-                               (list* 'progn
-                                      forms)))
-                        (eval expression))))))
+    (with-output-to-string (stdout-stream)
+      (with-output-to-string (stderr-stream)
+        (let ((*standard-output* stdout-stream)
+              (*error-output* stderr-stream))
+          (flet ((make-output-results ()
+                   (let ((stdout (str:trim (get-output-stream-string stdout-stream)))
+                         (stderr (str:trim (get-output-stream-string stderr-stream))))
+                     (append (unless (str:emptyp stdout)
+                               (list (make-instance 'text-content
+                                                    :text (fmt "## STDOUT~2%~A"
+                                                               stdout))))
+                             (unless (str:emptyp stderr)
+                               (list (make-instance 'text-content
+                                                    :text (fmt "## STDERR~2%~A"
+                                                               stderr))))))))
+            (let* ((result-values
+                     (multiple-value-list
+                      (handler-bind ((serious-condition
+                                       (lambda (c)
+                                         (let ((error-message
+                                                 (with-output-to-string (s)
+                                                   (format s "## ERROR~2%")
+                                                   (trivial-backtrace:print-condition c s))))
+                                           (error 'tool-error
+                                                  :content (list* (make-instance 'text-content
+                                                                                 :text error-message)
+                                                                  (make-output-results)))))))
+                        (let* ((*package* (or (find-package in-package)
+                                              (find-package (string-upcase in-package))
+                                              (error 'tool-error
+                                                     :content (list* (make-instance 'text-content
+                                                                                    :text (fmt "Package \"~A\" was not found."
+                                                                                               in-package))))))
+                               (package-name (package-name *package*))
+                               (forms (uiop:with-safe-io-syntax (:package package-name)
+                                        (with-input-from-string (s form)
+                                          (uiop:slurp-stream-forms s))))
+                               ;; To allow eval multiple forms, we need to wrap
+                               ;; them with PROGN:
+                               (expression
+                                 (list* 'progn
+                                        forms)))
+                          (eval expression))))))
 
-            (return-from func
-              (append
-               (loop for value in result-values
-                     for idx upfrom 1
-                     collect (make-instance 'text-content
-                                            :text (fmt "## VALUE-~A~2%~A"
-                                                       idx
-                                                       value)))
-               (make-output-results)))))))))
+              (return-from func
+                (append
+                 (loop for value in result-values
+                       for idx upfrom 1
+                       collect (make-instance 'text-content
+                                              :text (fmt "## VALUE-~A~2%~A"
+                                                         idx
+                                                         value)))
+                 (make-output-results))))))))))
 
 
 (defun main (&rest argv)

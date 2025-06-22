@@ -64,20 +64,6 @@
                  :initarg :cursor)))
 
 
-(defclass tool-call-response ()
-  ((content :type (soft-list-of content)
-            :initarg :content)
-   (|isError| :type boolean
-              :initform nil
-              :initarg :is-error)))
-
-
-
-;; (defparameter *mcp-tools*
-;;   (list example-tools))
-
-
-
 (-> get-method-params (method-info)
     (values hash-table
             list

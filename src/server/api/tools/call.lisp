@@ -22,6 +22,8 @@
   (:import-from #:40ants-mcp/server/errors
                 #:tool-error-content
                 #:tool-error)
+  (:import-from #:40ants-mcp/content/base
+                #:content)
   (:export #:mcp-server
            #:server-name
            #:server-version
@@ -32,6 +34,14 @@
            #:start-server
            #:stop-server))
 (in-package #:40ants-mcp/server/api/tools/call)
+
+
+(defclass tool-call-response ()
+  ((content :type (soft-list-of content)
+            :initarg :content)
+   (|isError| :type boolean
+              :initform nil
+              :initarg :is-error)))
 
 
 (-> search-tool (string (soft-list-of openrpc-server:api))

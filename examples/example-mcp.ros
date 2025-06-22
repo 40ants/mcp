@@ -16,6 +16,8 @@ exec ros -Q -- $0 "$@"
 ;;;; With SLYNK support for remote debugging:
 ;;;;   SLYNK_PORT=4005 ./example-mcp.ros
 
+(declaim (optimize (debug 3) (safety 3)))
+
 ;; Load required systems
 (push "~/projects/lisp/40ants-logging/" asdf:*central-registry*)
 (push "~/projects/lisp/40ants-openrpc/" asdf:*central-registry*)

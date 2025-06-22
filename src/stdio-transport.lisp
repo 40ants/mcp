@@ -3,14 +3,15 @@
   (:import-from #:yason)
   (:import-from #:alexandria)
   (:import-from #:log)
+  (:import-from #:40ants-mcp/transport/base
+                #:stop-loop
+                #:start-loop)
   (:export #:stdio-transport
            #:transport-input
            #:transport-output
            #:transport-running-p
            #:send-message
-           #:receive-message
-           #:start-stdio-loop
-           #:stop-transport))
+           #:receive-message))
 (in-package #:40ants-mcp/stdio-transport)
 
 (defclass stdio-transport ()
@@ -78,7 +79,7 @@
       (log:info "ERROR handling message: ~A" e))))
 
 
-(defmethod start-stdio-loop ((transport stdio-transport) message-handler)
+(defmethod start-loop ((transport stdio-transport) message-handler)
   "Start the main STDIO message loop"
   (log:info "Starting STDIO transport loop...")
   (loop while (transport-running-p transport)
@@ -87,7 +88,8 @@
           do (process-message message message-handler))
   (log:info "STDIO transport loop ended."))
 
-(defmethod stop-transport ((transport stdio-transport))
+
+(defmethod stop-loop ((transport stdio-transport))
   "Stop the transport gracefully"
   (setf (transport-running-p transport) nil))
 
