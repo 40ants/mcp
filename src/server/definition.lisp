@@ -15,6 +15,8 @@
                 #:make-error-response
                 #:+mcp-method-not-found+
                 #:+mcp-invalid-params+)
+  (:import-from #:40ants-mcp/http-transport
+                #:http-transport)
   (:import-from #:log)
   (:import-from #:jsonrpc)
   (:import-from #:serapeum
@@ -40,7 +42,8 @@
                       :reader server-tools-collections)))
 
 
-(defun handle-stdio-message (rpc-server message)
+(defun handle-message (rpc-server message)
+  "Generic message handler for both STDIO and HTTP transports."
   (log:info "Handling" message)
   (restart-case
       (let ((parsed-request
@@ -65,13 +68,18 @@
 
 
 (-> start-server ((or api
-                      (soft-list-of api)))
+                      (soft-list-of api))
+                  &key
+                  (:transport (member :stdio :http))
+                  (:port (or null integer)))
     (values &optional))
 
 
-(defun start-server (tools-collections)
-  "Start the MCP server"
-  (log:info "Starting MCP server")
+(defun start-server (tools-collections &key (transport :stdio) (port 8080))
+  "Start the MCP server with specified transport.
+   TRANSPORT can be :stdio or :http.
+   PORT is only used when transport is :http."
+  (log:info "Starting MCP server with" transport "transport")
 
   (let* ((rpc-server (jsonrpc:make-server)))
 
@@ -86,8 +94,14 @@
           do (jsonrpc:expose rpc-server name
                              (method-thunk method-info)))
 
-    (start-loop (make-instance 'stdio-transport)
-                (lambda (message)
-                  (handle-stdio-message rpc-server message)))))
+    ;; Create and start transport
+    (let ((transport-instance
+            (ecase transport
+              (:stdio (make-instance 'stdio-transport))
+              (:http (make-instance 'http-transport :port port)))))
+
+      (start-loop transport-instance
+                  (lambda (message)
+                    (handle-message rpc-server message)))))))
 
 

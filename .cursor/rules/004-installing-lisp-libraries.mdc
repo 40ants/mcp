@@ -1,0 +1,6 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+To install lisp libraries don't execute anything in terminal. Use ql:quickload to just load the library.

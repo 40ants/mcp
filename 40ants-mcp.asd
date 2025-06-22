@@ -14,6 +14,7 @@
                "40ants-mcp/server/api/tools/list"
                "40ants-mcp/server/api/tools/call"
                "40ants-mcp/content/text"
+               "40ants-mcp/http-transport"
                "openrpc-server"         ; JSON-RPC foundation
                "openrpc-client"         ; For testing and client features
                "yason"                  ; JSON handling (already used by openrpc)
@@ -23,6 +24,10 @@
                "local-time"             ; Timestamps
                "uuid"                   ; Request IDs
                "cl-ppcre"               ; Pattern matching
+               "lack"                   ; Web application framework
+               "lack-request"           ; HTTP request handling
+               "lack-response"          ; HTTP response handling
+               "clack"                  ; HTTP server
                "log4cl")              ; Logging
   :in-order-to ((test-op (test-op "40ants-mcp-tests"))))
 

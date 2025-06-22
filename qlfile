@@ -2,3 +2,9 @@ dist ultralisp http://dist.ultralisp.org/
 
 # This branch is what I use in my Emacs.
 github slynk svetlyak40wt/sly :branch patches
+
+# Testing framework
+github rove fukamachi/rove :branch master
+
+# Web application framework and testing
+github lack fukamachi/lack :branch master
