@@ -24,6 +24,8 @@
                 #:with-log-unhandled)
   (:import-from #:serapeum
                 #:dict)
+  (:import-from #:log4cl-extras/context
+                #:with-fields)
   (:export #:http-transport
            #:transport-port))
 (in-package #:40ants-mcp/http-transport)
@@ -83,17 +85,26 @@
   "Handle an incoming HTTP request."
   (let ((path-info (getf env :path-info))
         (method (getf env :request-method)))
-    (flet ((return-error-response (&key (code 500) (message "Internal Server Error"))
-             (let ((error-response (dict
-                                    "jsonrpc" "2.0"
-                                    "error" (dict "code" code
-                                                  "message" message))))
-               (return-from handle-request
-                 (list 500
-                       (list :content-type "application/json"
-                             :mcp-protocol-version *protocol-version*)
-                       (list (with-output-to-string (s)
-                               (yason:encode error-response s))))))))
+    (labels ((return-error-response (&key (code 500) (message "Internal Server Error"))
+               (let ((error-response (dict
+                                      "jsonrpc" "2.0"
+                                      "error" (dict "code" code
+                                                    "message" message))))
+                 (return-from handle-request
+                   (list 500
+                         (list :content-type "application/json"
+                               :mcp-protocol-version *protocol-version*)
+                         (list (with-output-to-string (s)
+                                 (yason:encode error-response s)))))))
+             (parse-body (request)
+               (handler-bind ((error (lambda (e)
+                                       (log:error "Error processing request:" e)
+                                       (return-error-response))))
+                 (with-log-unhandled ()
+                   (let* ((raw-body (lack/request:request-content request))
+                          (body-string (when raw-body
+                                         (babel:octets-to-string raw-body))))
+                     (values body-string))))))
       (cond
         ((and (eq method :GET)
               (string= path-info "/mcp"))
@@ -104,73 +115,53 @@
         ;; Only handle POST requests to /mcp endpoint
         ((and (eq method :POST)
               (string= path-info "/mcp"))
-         (handler-bind ((type-error (lambda (e)
-                                      (log:error "Invalid JSON:" e)
-                                      (let ((error-response (alexandria:alist-hash-table
-                                                             `(("jsonrpc" . "2.0")
-                                                               ("error" . ,(alexandria:alist-hash-table
-                                                                            `(("code" . 400)
-                                                                              ("message" . "Invalid JSON"))
-                                                                            :test 'equal)))
-                                                             :test 'equal)))
-                                        (return-from handle-request
-                                          (list 400
-                                                (list :content-type "application/json"
-                                                      :mcp-protocol-version *protocol-version*)
-                                                (list (with-output-to-string (s)
-                                                        (yason:encode error-response s))))))
-                                      ))
-                        (error (lambda (e)
-                                 (log:error "Error processing request:" e)
-                                 (return-error-response))))
-          
-           (let* ((request (lack/request:make-request env))
-                  (raw-body (lack/request:request-content request))
-                  (body-string (when raw-body
-                                 (babel:octets-to-string raw-body)))
-                  (body (yason:parse body-string))
-                  (id (and body (gethash "id" body))))
-             (log:info "Processing request, id:" id ", body string:" body-string)
-             (handler-bind ((error (lambda (e)
-                                     (log:error "Error in message handler:" e)
-                                     
-                                     (let ((error-response (alexandria:alist-hash-table
-                                                            `(("jsonrpc" . "2.0")
-                                                              ("error" . ,(alexandria:alist-hash-table
-                                                                           `(("code" . 500)
-                                                                             ("message" . "Internal Server Error"))
-                                                                           :test 'equal)))
-                                                            :test 'equal)))
-                                       (return-from handle-request
-                                         (list 500
-                                               (list :content-type "application/json"
-                                                     :mcp-protocol-version *protocol-version*)
-                                               (list (with-output-to-string (s)
-                                                       (yason:encode error-response s)))))))))
-               (with-log-unhandled ()
-                 (let ((response (funcall (transport-message-handler transport)
-                                          body-string)))
-                   (log:info "Handler response:" response)
-                   (log:info "Handler response type:" (type-of response))
-                   (cond
-                     ;; For notifications (no id), return 202 Accepted
-                     ((null id)
-                      (log:info "Handling notification")
-                      (list 202
-                            (list :content-type "application/json"
-                                  :mcp-protocol-version *protocol-version*)
-                            nil))
+         (let* ((request (let ((http-body::*content-type-map* nil))
+                           ;; This call can signal SB-KERNEL:CASE-FAILURE if JSON will be invalid
+                           ;; thus we set http-body::*content-type-map* to NIL and will parse
+                           ;; body later in the transport-message-handler:
+                           (lack/request:make-request env)))
+                (body-string (parse-body request)))
+           
+           (log:info "Processing request" body-string)
+           
+           (handler-bind ((error (lambda (e)
+                                   (log:error "Error in message handler:" e)
+                                   (return-error-response))))
+             (with-log-unhandled ()
+               (let ((response (funcall (transport-message-handler transport)
+                                        body-string)))
+                 (log:info "Handler response:" response)
+                 (log:info "Handler response type:" (type-of response))
+                 (cond
+                   ;; For notifications (no id), return 202 Accepted
+                   ((null response)
+                    (log:info "Handling notification")
+                    (list 202
+                          (list :content-type "application/json"
+                                :mcp-protocol-version *protocol-version*)
+                          nil))
 
-                     ;; For other responses
-                     ((typep response 'string)
-                      (log:info "Handling other response")
-                      (list 200
-                            (list :content-type "application/json"
-                                  :mcp-protocol-version *protocol-version*)
-                            (list response)))
-                     (t
-                      (log:info "Unknown response type")
-                      (return-error-response)))))))))
+                   ;; For other responses
+                   ((typep response 'string)
+                    (log:info "Handling string response")
+                    (list 200
+                          (list :content-type "application/json"
+                                :mcp-protocol-version *protocol-version*)
+                          (list response)))
+                   
+                   ((consp response)
+                    (log:info "Handling a custom response" response)
+                    (destructuring-bind (code headers body)
+                        response
+                      (unless (getf headers :mcp-protocol-version)
+                        (setf (getf headers :mcp-protocol-version)
+                              *protocol-version*))
+                      (list code
+                            headers
+                            (uiop:ensure-list body))))
+                   (t
+                    (log:info "Unknown response type")
+                    (return-error-response :code 500 :message "Unknown response type"))))))))
         ;; Return 404 for unknown paths
         (t
          (log:warn "Route not found" method path-info)

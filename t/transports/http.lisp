@@ -17,82 +17,101 @@
   (:import-from #:lack.request)
   (:import-from #:lack.response)
   (:import-from #:lack/test
-                #:generate-env))
+                #:generate-env)
+  (:import-from #:serapeum
+                #:dict)
+  (:import-from #:40ants-mcp/server/definition
+                #:handle-message
+                #:initialize-rpc-server))
 (in-package #:40ants-mcp-tests/transports/http)
 
 
 (defun make-json-rpc-request (method params &key id)
   "Create a JSON-RPC request object"
-  (yason:with-output-to-string* ()
-    (yason:encode
-     (alexandria:alist-hash-table
-      `(("jsonrpc" . "2.0")
-        ("method" . ,method)
-        ("params" . ,params)
-        ,@(when id
-            `(("id" . ,id))))
-      :test 'equal))))
+  (let ((payload
+          (dict "jsonrpc" "2.0"
+                "method" method
+                "params" params)))
+    (when id
+      (setf (gethash "id" payload)
+            id))
+    
+    (yason:with-output-to-string* ()
+      (yason:encode payload))))
+
 
 (deftest http-transport-test
   (testing "Basic HTTP transport functionality"
     (let* ((transport (make-instance 'http-transport :port 8081))
            (app (transport-lack-app transport))
-           (messages nil))
+           (messages nil)
+           ;; No tools for this test:
+           (rpc-server (initialize-rpc-server nil)))
+      
       (setf (transport-message-handler transport)
             (lambda (message)
-              (push message messages)))
-      (unwind-protect
-           (progn
-             (testing "POST to /mcp endpoint"
-               (let* ((request (make-json-rpc-request "echo"
-                                                      (alexandria:alist-hash-table
-                                                       '(("text" . "Hello World!"))
-                                                       :test 'equal)
-                                                      :id 1))
-                      (response (funcall app
-                                         (generate-env "/mcp"
-                                                       :method :post
-                                                       :content request
-                                                       :headers '(("content-type" . "application/json")
-                                                                  ("mcp-protocol-version" . "2025-06-18"))))))
-                 (ok (= 200 (lack.response:response-status response))
-                     "Response status should be 200")
-                 (ok (equal "application/json"
-                            (getf (lack.response:response-headers response) :content-type))
-                     "Response should have JSON content type")))
+              (let ((result (handle-message rpc-server message)))
+                (push message messages)
+                (values result))))
+      
+      (testing "POST to /mcp endpoint"
+        (let* ((request (make-json-rpc-request "echo"
+                                               (dict "text" "Hello World!")
+                                               :id 1))
+               (response (funcall app
+                                  (generate-env "/mcp"
+                                                :method :post
+                                                :content request
+                                                :headers '(("content-type" . "application/json")
+                                                           ("mcp-protocol-version" . "2025-06-18"))))))
+          (ok (= 200 (first response))
+              "Response status should be 200")
+          (ok (equal "application/json"
+                     (getf (second response) :content-type))
+              "Response should have JSON content type")))
 
-             (testing "GET to /mcp endpoint should return 404"
-               (let ((response (funcall app
-                                        (generate-env "/mcp"))))
-                 (ok (= 404 (lack.response:response-status response))
-                     "GET requests should return 404")))
+      (testing "GET to /mcp endpoint should return 404"
+        (let ((response (funcall app
+                                 (generate-env "/mcp"))))
+          (ok (typep response 'function)
+              "GET requests should a function for handling SSE")
 
-             (testing "POST to wrong endpoint should return 404"
-               (let ((response (funcall app
-                                        (generate-env "/wrong-path"
-                                                      :method :post))))
-                 (ok (= 404 (lack.response:response-status response))
-                     "Wrong paths should return 404")))
+          (when (typep response 'function)
+            ;; (= 200 (first response))
+            ;; TODO: call it to see response code and headers
+            nil
+            )
+          ))
 
-             (testing "Invalid JSON should return error"
-               (let ((response (funcall app
-                                        (generate-env "/mcp"
-                                                      :method :post
-                                                      :content "invalid json"
-                                                      :headers '(("content-type" . "application/json")
-                                                                 ("mcp-protocol-version" . "2025-06-18"))))))
-                 (ok (= 400 (lack.response:response-status response))
-                     "Invalid JSON should return 400 Bad Request"))))))))
+      (testing "POST to wrong endpoint should return 404"
+        (let ((response (funcall app
+                                 (generate-env "/wrong-path"
+                                               :method :post))))
+          (ok (= 404 (first response))
+              "Wrong paths should return 404")))
+
+      (testing "Invalid JSON should return error"
+        (let ((response (funcall app
+                                 (generate-env "/mcp"
+                                               :method :post
+                                               :content "invalid json"
+                                               :headers '(("content-type" . "application/json")
+                                                          ("mcp-protocol-version" . "2025-06-18"))))))
+          (ok (= 400 (first response))
+              "Invalid JSON should return 400 Bad Request"))))))
 
 
 (deftest http-transport-notifications-test
   (testing "JSON-RPC notification handling"
     (let ((transport (make-instance 'http-transport :port 8082))
-          (messages nil))
-
+          (messages nil)
+          (rpc-server (initialize-rpc-server nil)))
+      
       (setf (transport-message-handler transport)
             (lambda (message)
-              (push message messages)))
+              (let ((result (handle-message rpc-server message)))
+                (push message messages)
+                (values result))))
       
       (unwind-protect
            (testing "Notification should return 202 Accepted"
@@ -106,5 +125,5 @@
                                                      :content request
                                                      :headers '(("content-type" . "application/json")
                                                                 ("mcp-protocol-version" . "2025-06-18"))))))
-               (ok (= 202 (lack.response:response-status response))
+               (ok (= 202 (first response))
                    "Notifications should return 202 Accepted")))))))

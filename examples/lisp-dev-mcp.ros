@@ -43,6 +43,8 @@ exec ros -Q -- $0 "$@"
                 #:text-content)
   (:import-from #:40ants-mcp/server/errors
                 #:tool-error)
+  (:import-from #:40ants-mcp/tools
+                #:define-tool)
   (:export #:main))
 (in-package #:dev-mcp-server)
 
@@ -50,7 +52,7 @@ exec ros -Q -- $0 "$@"
 (openrpc-server:define-api (dev-tools :title "Lisp dev tools"))
 
 
-(openrpc-server:define-rpc-method (dev-tools eval-lisp-form) (form &key (in-package "CL-USER"))
+(define-tool (dev-tools eval-lisp-form) (form &key (in-package "CL-USER"))
   (:summary "Evaluates a given Lisp form and returns a list of values.
 
              Only one lisp form should be provided as the input.

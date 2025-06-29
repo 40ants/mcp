@@ -48,9 +48,13 @@
   (restart-case
       (let ((parsed-request
               (handler-case (jsonrpc:parse-message message)
-                (jsonrpc:jsonrpc-error ()
+                (jsonrpc:jsonrpc-error (error)
                   ;; Nothing can be done
-                  nil))))
+                  (return-from handle-message
+                    (list 400
+                          nil
+                          (list (fmt "Unable to decode body: ~A"
+                                     error))))))))
         (cond
           (parsed-request
            (let ((response (jsonrpc:dispatch rpc-server parsed-request)))
@@ -67,6 +71,28 @@
       (openrpc-server:return-error "Message processing was interrupted."))))
 
 
+(-> initialize-rpc-server ((or api
+                               (soft-list-of api)))
+    (values jsonrpc:server))
+
+(defun initialize-rpc-server (tools-collections)
+  "Initializes OpenRPC server and binds it to the "
+  (let* ((rpc-server (jsonrpc:make-server)))
+
+    (setf (openrpc-server/api::api-server mcp-server)
+          rpc-server)
+
+    (setf (slot-value mcp-server 'tools-collections)
+          (uiop:ensure-list tools-collections))
+
+    (loop for name being the hash-key of (api-methods mcp-server)
+            using (hash-value method-info)
+          do (jsonrpc:expose rpc-server name
+                             (method-thunk method-info)))
+
+    (values rpc-server)))
+
+
 (-> start-server ((or api
                       (soft-list-of api))
                   &key
@@ -81,19 +107,7 @@
    PORT is only used when transport is :http."
   (log:info "Starting MCP server with" transport "transport")
 
-  (let* ((rpc-server (jsonrpc:make-server)))
-
-    (setf (openrpc-server/api::api-server mcp-server)
-          rpc-server)
-
-    (setf (slot-value mcp-server 'tools-collections)
-          (uiop:ensure-list tools-collections))
-
-    (loop for name being the hash-key of (api-methods mcp-server)
-            using (hash-value method-info)
-          do (jsonrpc:expose rpc-server name
-                             (method-thunk method-info)))
-
+  (let* ((rpc-server (initialize-rpc-server tools-collections)))
     ;; Create and start transport
     (let ((transport-instance
             (ecase transport

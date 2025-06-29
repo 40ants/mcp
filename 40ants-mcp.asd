@@ -34,6 +34,6 @@
 
 
 (asdf:register-system-packages "log4cl" '("LOG"))
-(asdf:register-system-packages "lack/response" '("LACK.RESPONSE"))
+(asdf:register-system-packages "lack/response" '("LACK.RESPONSE" "LACK.REQUEST"))
 (asdf:register-system-packages "lack/test" '("LACK.TEST"))
 (asdf:register-system-packages "sento" '("SENTO.ACTOR-SYSTEM"))

@@ -82,11 +82,13 @@ A comprehensive framework for building [Model Context Protocol (MCP)](https://mo
 ## Features
 
 - ✅ **STDIO Transport**: Native support for STDIO-based communication
+- ✅ **StreamableHTTP Transport**: Allowing to create remotely hosted MCP servers
 - ✅ **Tools System**: Register and execute custom tools with JSON Schema validation
 - ✅ **Built on OpenRPC**: Leverages the robust [40ants OpenRPC library](https://40ants.com/openrpc/)
 - ✅ **CLOS-based**: Object-oriented design with proper encapsulation
 - ✅ **Easy Integration**: Simple API for adding functionality
 - ✅ **Error Handling**: Comprehensive error management with proper JSON-RPC error codes
+- ✅ **Interactive Editing**: MCP tools can be edited and updated on the fly, using REPL driven approach
 
 ## Roadmap
 
@@ -126,7 +128,7 @@ Here's a quick example of how to create an MCP server with custom tools:
 (openrpc-server:define-api (my-tools :title "My Custom Tools"))
 
 ;; Define a tool that adds two numbers
-(openrpc-server:define-rpc-method (my-tools add) (a b)
+(40ants-mcp/tools:define-tool (my-tools add) (a b)
   (:summary "Adds two numbers and returns the result.")
   (:param a integer "First number to add.")
   (:param b integer "Second number to add.")
