@@ -1,32 +1,22 @@
 (uiop:define-package #:40ants-mcp/http-transport
   (:use #:cl)
   (:import-from #:yason)
-  (:import-from #:alexandria)
   (:import-from #:log)
-  (:import-from #:lack)
-  (:import-from #:sse-server)
   (:import-from #:clack)
   (:import-from #:clack-sse)
   (:import-from #:lack/request
                 #:make-request
                 #:request-body-parameter)
-  (:import-from #:lack/response)
   (:import-from #:40ants-mcp/server/connections)
   (:import-from #:40ants-mcp/transport/base
                 #:send-message
                 #:receive-message
                 #:stop-loop
                 #:start-loop)
-  (:import-from #:40ants-mcp/content/text
-                #:content-text
-                #:text-content
-                #:text)
   (:import-from #:log4cl-extras/error
                 #:with-log-unhandled)
   (:import-from #:serapeum
                 #:dict)
-  (:import-from #:log4cl-extras/context
-                #:with-fields)
   (:export #:http-transport
            #:transport-port
            #:transport-lack-app
