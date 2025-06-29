@@ -105,7 +105,7 @@
   "Start the MCP server with specified transport.
    TRANSPORT can be :stdio or :http.
    PORT is only used when transport is :http."
-  (log:info "Starting MCP server with" transport "transport")
+  (log:info "Starting MCP server with" transport "transport and tools" tools-collections)
 
   (let* ((rpc-server (initialize-rpc-server tools-collections)))
     ;; Create and start transport

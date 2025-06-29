@@ -19,13 +19,14 @@ exec ros -Q -- $0 "$@"
 (declaim (optimize (debug 3) (safety 3)))
 
 ;; Load required systems
+(push "~/projects/lisp/clack-sse/" asdf:*central-registry*)
 (push "~/projects/lisp/40ants-logging/" asdf:*central-registry*)
 (push "~/projects/lisp/40ants-openrpc/" asdf:*central-registry*)
 (push "~/projects/lisp/openrpc/" asdf:*central-registry*)
 
 (declaim (optimize (debug 3) (safety 3)))
 
-(ql:quickload '(:40ants-mcp :alexandria :local-time :40ants-slynk) :silent t)
+(ql:quickload '(:40ants-mcp :alexandria :local-time :40ants-slynk :defmain) :silent t)
 
 (defpackage #:dev-mcp-server
   (:use #:cl)
@@ -45,6 +46,8 @@ exec ros -Q -- $0 "$@"
                 #:tool-error)
   (:import-from #:40ants-mcp/tools
                 #:define-tool)
+  (:import-from #:defmain
+                #:defmain)
   (:export #:main))
 (in-package #:dev-mcp-server)
 
@@ -129,7 +132,9 @@ exec ros -Q -- $0 "$@"
                  (make-output-results))))))))))
 
 
-(defun main (&rest argv)
+(defmain (main) ((port "TCP port to listen on. If given, Streaming HTTP transport will be used.")
+                 (debug "If this flag set, then a debugger will be opened when you've conntected to the server with SLY."
+                        :flag t))
   "Main entry point for the Roswell script"
   (declare (ignore argv))
 
@@ -142,9 +147,7 @@ exec ros -Q -- $0 "$@"
   ;; Start SLYNK server if SLYNK_PORT environment variable is set
   (start-slynk-if-needed)
 
-  (setf jsonrpc/errors:*debug-on-error* t)
-
-  (log:info "Starting Dev MCP Server")
-  (log:info "Lisp: ~A ~A" (lisp-implementation-type) (lisp-implementation-version))
-  (log:info "Roswell: ~A" (or (uiop:getenv "ROSWELL_VERSION") "Unknown"))
+  (when debug
+    (setf jsonrpc/errors:*debug-on-error* t))
+  
   (40ants-mcp/server/definition:start-server dev-tools))

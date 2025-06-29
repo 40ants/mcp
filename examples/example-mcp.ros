@@ -73,7 +73,9 @@ exec ros -Q -- $0 "$@"
                                      a b (+ a b)))))
 
 
-(defmain (main) ((port "TCP port to listen on. If given, Streaming HTTP transport will be used."))
+(defmain (main) ((port "TCP port to listen on. If given, Streaming HTTP transport will be used.")
+                 (debug "If this flag set, then a debugger will be opened when you've conntected to the server with SLY."
+                        :flag t))
   "Main entry point for the Roswell script"
   
   (40ants-logging:setup-for-backend
@@ -85,11 +87,8 @@ exec ros -Q -- $0 "$@"
   ;; Start SLYNK server if SLYNK_PORT environment variable is set
   (start-slynk-if-needed)
 
-  (setf jsonrpc/errors:*debug-on-error* t)
-
-  (log:info "Starting Example MCP Server")
-  (log:info "Lisp: ~A ~A" (lisp-implementation-type) (lisp-implementation-version))
-  (log:info "Roswell: ~A" (or (uiop:getenv "ROSWELL_VERSION") "Unknown"))
+  (when debug
+    (setf jsonrpc/errors:*debug-on-error* t))
 
   (40ants-mcp/server/definition:start-server example-tools
                                              :transport (cond
