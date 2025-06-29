@@ -24,6 +24,7 @@
                  :initform (dict "tools" (dict "listChanged" t)))
    (|serverInfo| :type hash-table
                  :initform (dict "name" "40ants-mcp"
+                                 "title" "An example of MCP written in Common Lisp."
                                  "version" "0.1.0"))))
 
 

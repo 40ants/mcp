@@ -51,7 +51,7 @@
         },
         {
           "name": "Run Linter",
-          "run": "qlot exec 40ants-linter --system \"40ants-mcp, 40ants-mcp-docs, 40ants-mcp-tests\"",
+          "run": "qlot exec 40ants-linter --system \"40ants-mcp, 40ants-mcp-docs, 40ants-mcp-tests\" --imports",
           "shell": "bash"
         }
       ]

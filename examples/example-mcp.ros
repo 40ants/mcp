@@ -19,13 +19,14 @@ exec ros -Q -- $0 "$@"
 (declaim (optimize (debug 3) (safety 3)))
 
 ;; Load required systems
+(push "~/projects/lisp/clack-sse/" asdf:*central-registry*)
 (push "~/projects/lisp/40ants-logging/" asdf:*central-registry*)
 (push "~/projects/lisp/40ants-openrpc/" asdf:*central-registry*)
 (push "~/projects/lisp/openrpc/" asdf:*central-registry*)
 
 (declaim (optimize (debug 3) (safety 3)))
 
-(ql:quickload '(:40ants-mcp :alexandria :local-time :40ants-slynk) :silent t)
+(ql:quickload '(:40ants-mcp :alexandria :local-time :40ants-slynk :defmain) :silent t)
 
 (defpackage #:example-mcp-server
   (:use #:cl)
@@ -41,6 +42,10 @@ exec ros -Q -- $0 "$@"
   (:import-from #:alexandria)
   (:import-from #:40ants-mcp/content/text
                 #:text-content)
+  (:import-from #:defmain
+                #:defmain)
+  (:import-from #:40ants-mcp/tools
+                #:define-tool)
   (:export #:main))
 (in-package #:example-mcp-server)
 
@@ -48,28 +53,31 @@ exec ros -Q -- $0 "$@"
 (openrpc-server:define-api (example-tools :title "Example tools"))
 
 
-(openrpc-server:define-rpc-method (example-tools echo) (text)
+(define-tool (example-tools echo) (text)
   (:summary "Simply returns the input text back to the caller.")
   (:param text string "Text to echo back.")
   (:result (soft-list-of text-content))
+  
   (list (make-instance 'text-content
-                      :text text)))
+                       :text text)))
 
 
-(openrpc-server:define-rpc-method (example-tools add) (a b)
+(define-tool (example-tools add) (a b)
   (:summary "Adds two numbers and returns the result.")
   (:param a integer "First number to add.")
   (:param b integer "Second number to add.")
   (:result (soft-list-of text-content))
+  
   (list (make-instance 'text-content
-                      :text (format nil "The sum of ~A and ~A is: ~A"
-                                  a b (+ a b)))))
+                       :text (format nil "The sum of ~A and ~A is: ~A"
+                                     a b (+ a b)))))
 
 
-(defun main (&rest argv)
+(defmain (main) ((port "TCP port to listen on. If given, Streaming HTTP transport will be used.")
+                 (debug "If this flag set, then a debugger will be opened when you've conntected to the server with SLY."
+                        :flag t))
   "Main entry point for the Roswell script"
-  (declare (ignore argv))
-
+  
   (40ants-logging:setup-for-backend
    :filename (make-pathname :directory '(:absolute "tmp")
                             :name "example-mcp"
@@ -79,9 +87,13 @@ exec ros -Q -- $0 "$@"
   ;; Start SLYNK server if SLYNK_PORT environment variable is set
   (start-slynk-if-needed)
 
-  (setf jsonrpc/errors:*debug-on-error* t)
+  (when debug
+    (setf jsonrpc/errors:*debug-on-error* t))
 
-  (log:info "Starting Example MCP Server")
-  (log:info "Lisp: ~A ~A" (lisp-implementation-type) (lisp-implementation-version))
-  (log:info "Roswell: ~A" (or (uiop:getenv "ROSWELL_VERSION") "Unknown"))
-  (40ants-mcp/server/definition:start-server example-tools))
+  (40ants-mcp/server/definition:start-server example-tools
+                                             :transport (cond
+                                                          (port
+                                                           :http)
+                                                          (t
+                                                           :stdio))
+                                             :port (parse-integer port)))

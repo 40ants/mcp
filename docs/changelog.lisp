@@ -10,5 +10,7 @@
                               "REPL"
                               "STDIO"
                               "HTTP"))
+  (0.2.0 2025-06-29
+         "* Implemented streamableHTTP protocol and notifications on changed tools.")
   (0.1.0 2025-06-22
          "* Initial version supporting STDIO and Tools."))
