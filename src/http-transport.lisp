@@ -28,7 +28,11 @@
   (:import-from #:log4cl-extras/context
                 #:with-fields)
   (:export #:http-transport
-           #:transport-port))
+           #:transport-port
+           #:transport-lack-app
+           #:transport-server
+           #:transport-message-handler
+           #:transport-running-p))
 (in-package #:40ants-mcp/http-transport)
 
 

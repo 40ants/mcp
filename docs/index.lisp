@@ -44,6 +44,7 @@
                                    "MCP"
                                    "JSON-RPC"
                                    "STDIO"
+                                   "POST"
                                    "HTTP"
                                    "TODO"
                                    "Unlicense"
