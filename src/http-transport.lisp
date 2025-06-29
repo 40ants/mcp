@@ -5,6 +5,7 @@
   (:import-from #:log)
   (:import-from #:lack)
   (:import-from #:sse-server)
+  (:import-from #:clack)
   (:import-from #:clack-sse)
   (:import-from #:lack/request
                 #:make-request
