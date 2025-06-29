@@ -90,7 +90,7 @@ A comprehensive framework for building [Model Context Protocol (MCP)](https://mo
 
 ## Roadmap
 
-- 🔄 **Full MCP Specification Support**: Complete implementation of MCP protocol version 2024-11-05
+- 🔄 **Full MCP Specification Support**: Complete implementation of MCP protocol version 2025-06-18
 - 🔄 **Resources System**: Serve dynamic and static resources via URI
 - 🔄 **Prompts System**: Provide prompt templates with argument interpolation
 - 🔄 **MCP Client Protocol**: Implement client-side protocol for connecting to MCP servers

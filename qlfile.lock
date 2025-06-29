@@ -1,20 +1,12 @@
 ("quicklisp" .
  (:class qlot/source/dist:source-dist
   :initargs (:distribution "https://beta.quicklisp.org/dist/quicklisp.txt" :%version :latest)
-  :version "2024-10-12"))
+  :version "2025-06-22"))
 ("ultralisp" .
  (:class qlot/source/dist:source-dist
   :initargs (:distribution "https://dist.ultralisp.org/" :%version :latest)
-  :version "20250622123000"))
+  :version "20250629014000"))
 ("slynk" .
  (:class qlot/source/github:source-github
   :initargs (:repos "svetlyak40wt/sly" :ref nil :branch "patches" :tag nil)
   :version "github-030a8441f57f7e0bb401570935e741dfd9edfb83"))
-("rove" .
- (:class qlot/source/github:source-github
-  :initargs (:repos "fukamachi/rove" :ref nil :branch "master" :tag nil)
-  :version "github-9868028edf511da5fe61355881af9f4c35f051df"))
-("lack" .
- (:class qlot/source/github:source-github
-  :initargs (:repos "fukamachi/lack" :ref nil :branch "master" :tag nil)
-  :version "github-316b2e9650a59cf71fc6c2b2ca50a01e54c1224c"))

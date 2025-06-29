@@ -102,6 +102,4 @@
 
       (start-loop transport-instance
                   (lambda (message)
-                    (handle-message rpc-server message)))))))
-
-
+                    (handle-message rpc-server message))))))

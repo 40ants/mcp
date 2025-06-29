@@ -15,6 +15,7 @@
                "40ants-mcp/server/api/tools/call"
                "40ants-mcp/content/text"
                "40ants-mcp/http-transport"
+               "40ants-mcp/tools"
                "openrpc-server"         ; JSON-RPC foundation
                "openrpc-client"         ; For testing and client features
                "yason"                  ; JSON handling (already used by openrpc)
@@ -33,3 +34,6 @@
 
 
 (asdf:register-system-packages "log4cl" '("LOG"))
+(asdf:register-system-packages "lack/response" '("LACK.RESPONSE"))
+(asdf:register-system-packages "lack/test" '("LACK.TEST"))
+(asdf:register-system-packages "sento" '("SENTO.ACTOR-SYSTEM"))

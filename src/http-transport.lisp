@@ -4,24 +4,35 @@
   (:import-from #:alexandria)
   (:import-from #:log)
   (:import-from #:lack)
+  (:import-from #:sse-server)
+  (:import-from #:clack-sse)
   (:import-from #:lack.request
                 #:make-request
                 #:request-body-parameter)
   (:import-from #:lack.response)
+  (:import-from #:40ants-mcp/server/connections)
   (:import-from #:40ants-mcp/transport/base
                 #:send-message
                 #:receive-message
                 #:stop-loop
                 #:start-loop)
   (:import-from #:40ants-mcp/content/text
+                #:content-text
                 #:text-content
                 #:text)
   (:import-from #:log4cl-extras/error
                 #:with-log-unhandled)
+  (:import-from #:serapeum
+                #:dict)
   (:export #:http-transport
            #:transport-port))
 (in-package #:40ants-mcp/http-transport)
 
+
+(defparameter *protocol-version*
+  "2025-03-26"
+  ;; "2025-06-18"
+  )
 
 (defclass http-transport ()
   ((port :initarg :port
@@ -47,126 +58,186 @@
   ;; Create Lack app with our request handler
   (setf (transport-lack-app obj)
         (lambda (env)
-          (handle-request obj env)))
+          (let ((response (handle-request obj env)))
+            (log:info "Returning" response)
+            (values response))))
   (values))
+
+
+
+
+(defun sse-stream-writer (env stream)
+  (declare (ignore env))
+
+  (40ants-mcp/server/connections::add-client-connection stream)
+
+  ;; Just sleep to prevent stream closing
+  (loop do
+    (sleep 10))
+
+  ;; Пример как уведомить о том, что список инструментов изменился:
+  ;; (log:info "Sending notification about tools list change")
+  
+  ;;   (sse-server:send-event! stream 
+  ;;                           "message"
+  ;;                           "{
+  ;;   \"jsonrpc\": \"2.0\",
+  ;;   \"method\": \"notifications/tools/list_changed\"
+  ;; }")
+  
+  ;; (finish-output stream)
+
+  
+  
+  ;; (loop repeat 5
+  ;;       for counter upfrom 1
+  ;;       do (log:info "Sending event to the server" counter)
+  ;;          (sse-server:send-event! stream
+  ;;                                  "my-custom-event"
+  ;;                                  (format nil "Hello World! ~d" counter))
+  ;;          (finish-output stream)
+  ;;          (sleep 5))
+  )
+
+
+(defparameter *sse-handler*
+  (clack-sse:serve-sse 'sse-stream-writer))
 
 
 (defun handle-request (transport env)
   "Handle an incoming HTTP request."
   (let ((path-info (getf env :path-info))
         (method (getf env :request-method)))
-    (cond
-      ;; Only handle POST requests to /mcp endpoint
-      ((and (eq method :POST)
-            (string= path-info "/mcp"))
-       (handler-bind ((type-error (lambda (e)
-                                    (log:error "Invalid JSON:" e)
-                                    ;; (invoke-debugger e)
-                                    (let ((error-response (alexandria:alist-hash-table
-                                                           `(("jsonrpc" . "2.0")
-                                                             ("error" . ,(alexandria:alist-hash-table
-                                                                          `(("code" . 400)
-                                                                            ("message" . "Invalid JSON"))
-                                                                          :test 'equal)))
-                                                           :test 'equal)))
-                                      (return-from handle-request
-                                        (lack/response:make-response 400
-                                                                     (list :content-type "application/json"
-                                                                           :mcp-protocol-version "2025-06-18")
-                                                                     (list (with-output-to-string (s)
-                                                                             (yason:encode error-response s))))))
-                                    ))
-                      (error (lambda (e)
-                               (log:error "Error processing request:" e)
-                               ;; (invoke-debugger e)
-                               (let ((error-response (alexandria:alist-hash-table
-                                                      `(("jsonrpc" . "2.0")
-                                                        ("error" . ,(alexandria:alist-hash-table
-                                                                     `(("code" . 500)
-                                                                       ("message" . "Internal Server Error"))
-                                                                     :test 'equal)))
-                                                      :test 'equal)))
-                                 (return-from handle-request
-                                   (lack/response:make-response 500
-                                                                (list :content-type "application/json"
-                                                                      :mcp-protocol-version "2025-06-18")
-                                                                (list (with-output-to-string (s)
-                                                                        (yason:encode error-response s))))))
-                               )))
+    (flet ((return-error-response (&key (code 500) (message "Internal Server Error"))
+             (let ((error-response (dict
+                                    "jsonrpc" "2.0"
+                                    "error" (dict "code" code
+                                                  "message" message))))
+               (return-from handle-request
+                 (list 500
+                       (list :content-type "application/json"
+                             :mcp-protocol-version *protocol-version*)
+                       (list (with-output-to-string (s)
+                               (yason:encode error-response s))))))))
+      (cond
+        ((and (eq method :GET)
+              (string= path-info "/mcp"))
+         (log:info "Responding with event stream" method path-info)
          
-         (let* ((request (lack/request:make-request env))
-                (raw-body (lack/request:request-content request))
-                (body-string (when raw-body
-                               (babel:octets-to-string raw-body)))
-                (body (yason:parse body-string))
-                (id (and body (gethash "id" body))))
-           (log:info "Processing request - body string:" body-string)
-           (log:info "Processing request - parsed body:" body)
-           (log:info "Processing request - id:" id)
-           (handler-bind ((error (lambda (e)
-                                   (log:error "Error in message handler:" e)
-                                   ;; (invoke-debugger e)
-                                     
-                                   (let ((error-response (alexandria:alist-hash-table
-                                                          `(("jsonrpc" . "2.0")
-                                                            ("error" . ,(alexandria:alist-hash-table
-                                                                         `(("code" . 500)
-                                                                           ("message" . "Internal Server Error"))
-                                                                         :test 'equal)))
-                                                          :test 'equal)))
-                                     (return-from handle-request
-                                       (lack/response:make-response 500
-                                                                    (list :content-type "application/json"
-                                                                          :mcp-protocol-version "2025-06-18")
-                                                                    (list (with-output-to-string (s)
-                                                                            (yason:encode error-response s))))))
-                                   )))
-             (with-log-unhandled ()
-               (let ((response (funcall (transport-message-handler transport)
-                                        body-string)))
-                 (log:info "Handler response:" response)
-                 (log:info "Handler response type:" (type-of response))
-                 (cond
-                   ;; For notifications (no id), return 202 Accepted
-                   ((null id)
-                    (log:info "Handling notification")
-                    (lack.response:make-response 202
-                                                 (list :content-type "application/json"
-                                                       :mcp-protocol-version "2025-06-18")
-                                                 nil))
-                   ;; For regular requests with text content response
-                   ((typep response 'text-content)
-                    (log:info "Handling text content response")
-                    (let* ((result (alexandria:alist-hash-table
-                                    `(("jsonrpc" . "2.0")
-                                      ("result" . ,(alexandria:alist-hash-table
-                                                    `(("type" . "text")
-                                                      ("text" . ,(text response)))
-                                                    :test 'equal))
-                                      ("id" . ,id))
-                                    :test 'equal))
-                           (json-string (with-output-to-string (s)
-                                          (yason:encode result s))))
-                      (log:info "Response data:" result)
-                      (log:info "JSON string:" json-string)
-                      (lack.response:make-response 200
-                                                   (list :content-type "application/json"
-                                                         :mcp-protocol-version "2025-06-18")
-                                                   (list json-string))))
-                   ;; For other responses
-                   (t
-                    (log:info "Handling other response")
-                    (let ((json-string (with-output-to-string (s)
-                                         (yason:encode response s))))
-                      (lack.response:make-response 200
-                                                   (list :content-type "application/json"
-                                                         :mcp-protocol-version "2025-06-18")
-                                                   (list json-string)))))))))))
-      ;; Return 404 for unknown paths
-      (t
-       (lack.response:make-response 404
-                                  (list :content-type "text/plain")
-                                  '("Not Found"))))))
+         ;; (log:warn "Route not found" method path-info)
+         ;; (list 404
+         ;;       (list :content-type "text/plain")
+         ;;       '("Not Found"))
+         (funcall *sse-handler* env)
+         ;; ;; We don't support Event Stream yet
+         ;; (lambda (responder)
+         ;;   (let ((writer (funcall responder
+         ;;                          '(200
+         ;;                            (:content-type "text/event-stream")))))
+         ;;     (funcall writer
+         ;;              "{}")
+         ;;     (loop while t
+         ;;           do (sleep 10)
+         ;;              (log:info "Keeping event stream alive"))))
+         )
+        ;; Only handle POST requests to /mcp endpoint
+        ((and (eq method :POST)
+              (string= path-info "/mcp"))
+         (handler-bind ((type-error (lambda (e)
+                                      (log:error "Invalid JSON:" e)
+                                      ;; (invoke-debugger e)
+                                      (let ((error-response (alexandria:alist-hash-table
+                                                             `(("jsonrpc" . "2.0")
+                                                               ("error" . ,(alexandria:alist-hash-table
+                                                                            `(("code" . 400)
+                                                                              ("message" . "Invalid JSON"))
+                                                                            :test 'equal)))
+                                                             :test 'equal)))
+                                        (return-from handle-request
+                                          (list 400
+                                                (list :content-type "application/json"
+                                                      :mcp-protocol-version *protocol-version*)
+                                                (list (with-output-to-string (s)
+                                                        (yason:encode error-response s))))))
+                                      ))
+                        (error (lambda (e)
+                                 (log:error "Error processing request:" e)
+                                 ;; (invoke-debugger e)
+                                 (return-error-response))))
+          
+           (let* ((request (lack/request:make-request env))
+                  (raw-body (lack/request:request-content request))
+                  (body-string (when raw-body
+                                 (babel:octets-to-string raw-body)))
+                  (body (yason:parse body-string))
+                  (id (and body (gethash "id" body))))
+             (log:info "Processing request, id:" id ", body string:" body-string)
+             (handler-bind ((error (lambda (e)
+                                     (log:error "Error in message handler:" e)
+                                     ;; (invoke-debugger e)
+                                    
+                                     (let ((error-response (alexandria:alist-hash-table
+                                                            `(("jsonrpc" . "2.0")
+                                                              ("error" . ,(alexandria:alist-hash-table
+                                                                           `(("code" . 500)
+                                                                             ("message" . "Internal Server Error"))
+                                                                           :test 'equal)))
+                                                            :test 'equal)))
+                                       (return-from handle-request
+                                         (list 500
+                                               (list :content-type "application/json"
+                                                     :mcp-protocol-version *protocol-version*)
+                                               (list (with-output-to-string (s)
+                                                       (yason:encode error-response s)))))))))
+               (with-log-unhandled ()
+                 (let ((response (funcall (transport-message-handler transport)
+                                          body-string)))
+                   (log:info "Handler response:" response)
+                   (log:info "Handler response type:" (type-of response))
+                   (cond
+                     ;; For notifications (no id), return 202 Accepted
+                     ((null id)
+                      (log:info "Handling notification")
+                      (list 202
+                            (list :content-type "application/json"
+                                  :mcp-protocol-version *protocol-version*)
+                            nil))
+                     ;; For regular requests with text content response
+                     ;; ((typep response 'text-content)
+                     ;;  (log:info "Handling text content response")
+                     ;;  (let* ((result (alexandria:alist-hash-table
+                     ;;                  `(("jsonrpc" . "2.0")
+                     ;;                    ("result" . ,(alexandria:alist-hash-table
+                     ;;                                  `(("type" . "text")
+                     ;;                                    ("text" . ,(content-text response)))
+                     ;;                                  :test 'equal))
+                     ;;                    ("id" . ,id))
+                     ;;                  :test 'equal))
+                     ;;         (json-string (with-output-to-string (s)
+                     ;;                        (yason:encode result s))))
+                     ;;    (log:info "Response data:" result)
+                     ;;    (log:info "JSON string:" json-string)
+                     ;;    (break)
+                     ;;    (list 200
+                     ;;          (list :content-type "application/json"
+                     ;;                :mcp-protocol-version *protocol-version*)
+                     ;;          (list json-string))))
+                     ;; For other responses
+                     ((typep response 'string)
+                      (log:info "Handling other response")
+                      (list 200
+                            (list :content-type "application/json"
+                                  :mcp-protocol-version *protocol-version*)
+                            (list response)))
+                     (t
+                      (log:info "Unknown response type")
+                      (return-error-response)))))))))
+        ;; Return 404 for unknown paths
+        (t
+         (log:warn "Route not found" method path-info)
+         (list 404
+               (list :content-type "text/plain")
+               '("Not Found")))))))
 
 
 (defmethod start-loop ((transport http-transport) message-handler)
@@ -179,7 +250,7 @@
         (clack:clackup (transport-lack-app transport)
                        :server :hunchentoot
                        :port (transport-port transport)
-                       :use-thread t)))
+                       :use-thread nil)))
 
 
 (defmethod stop-loop ((transport http-transport))
