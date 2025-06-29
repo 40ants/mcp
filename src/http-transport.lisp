@@ -30,9 +30,8 @@
 
 
 (defparameter *protocol-version*
-  "2025-03-26"
-  ;; "2025-06-18"
-  )
+  "2025-03-26")
+
 
 (defclass http-transport ()
   ((port :initarg :port
@@ -73,31 +72,7 @@
 
   ;; Just sleep to prevent stream closing
   (loop do
-    (sleep 10))
-
-  ;; Пример как уведомить о том, что список инструментов изменился:
-  ;; (log:info "Sending notification about tools list change")
-  
-  ;;   (sse-server:send-event! stream 
-  ;;                           "message"
-  ;;                           "{
-  ;;   \"jsonrpc\": \"2.0\",
-  ;;   \"method\": \"notifications/tools/list_changed\"
-  ;; }")
-  
-  ;; (finish-output stream)
-
-  
-  
-  ;; (loop repeat 5
-  ;;       for counter upfrom 1
-  ;;       do (log:info "Sending event to the server" counter)
-  ;;          (sse-server:send-event! stream
-  ;;                                  "my-custom-event"
-  ;;                                  (format nil "Hello World! ~d" counter))
-  ;;          (finish-output stream)
-  ;;          (sleep 5))
-  )
+    (sleep 10)))
 
 
 (defparameter *sse-handler*
@@ -124,28 +99,13 @@
               (string= path-info "/mcp"))
          (log:info "Responding with event stream" method path-info)
          
-         ;; (log:warn "Route not found" method path-info)
-         ;; (list 404
-         ;;       (list :content-type "text/plain")
-         ;;       '("Not Found"))
-         (funcall *sse-handler* env)
-         ;; ;; We don't support Event Stream yet
-         ;; (lambda (responder)
-         ;;   (let ((writer (funcall responder
-         ;;                          '(200
-         ;;                            (:content-type "text/event-stream")))))
-         ;;     (funcall writer
-         ;;              "{}")
-         ;;     (loop while t
-         ;;           do (sleep 10)
-         ;;              (log:info "Keeping event stream alive"))))
-         )
+         (funcall *sse-handler* env))
+        
         ;; Only handle POST requests to /mcp endpoint
         ((and (eq method :POST)
               (string= path-info "/mcp"))
          (handler-bind ((type-error (lambda (e)
                                       (log:error "Invalid JSON:" e)
-                                      ;; (invoke-debugger e)
                                       (let ((error-response (alexandria:alist-hash-table
                                                              `(("jsonrpc" . "2.0")
                                                                ("error" . ,(alexandria:alist-hash-table
@@ -162,7 +122,6 @@
                                       ))
                         (error (lambda (e)
                                  (log:error "Error processing request:" e)
-                                 ;; (invoke-debugger e)
                                  (return-error-response))))
           
            (let* ((request (lack/request:make-request env))
@@ -174,8 +133,7 @@
              (log:info "Processing request, id:" id ", body string:" body-string)
              (handler-bind ((error (lambda (e)
                                      (log:error "Error in message handler:" e)
-                                     ;; (invoke-debugger e)
-                                    
+                                     
                                      (let ((error-response (alexandria:alist-hash-table
                                                             `(("jsonrpc" . "2.0")
                                                               ("error" . ,(alexandria:alist-hash-table
@@ -202,26 +160,7 @@
                             (list :content-type "application/json"
                                   :mcp-protocol-version *protocol-version*)
                             nil))
-                     ;; For regular requests with text content response
-                     ;; ((typep response 'text-content)
-                     ;;  (log:info "Handling text content response")
-                     ;;  (let* ((result (alexandria:alist-hash-table
-                     ;;                  `(("jsonrpc" . "2.0")
-                     ;;                    ("result" . ,(alexandria:alist-hash-table
-                     ;;                                  `(("type" . "text")
-                     ;;                                    ("text" . ,(content-text response)))
-                     ;;                                  :test 'equal))
-                     ;;                    ("id" . ,id))
-                     ;;                  :test 'equal))
-                     ;;         (json-string (with-output-to-string (s)
-                     ;;                        (yason:encode result s))))
-                     ;;    (log:info "Response data:" result)
-                     ;;    (log:info "JSON string:" json-string)
-                     ;;    (break)
-                     ;;    (list 200
-                     ;;          (list :content-type "application/json"
-                     ;;                :mcp-protocol-version *protocol-version*)
-                     ;;          (list json-string))))
+
                      ;; For other responses
                      ((typep response 'string)
                       (log:info "Handling other response")
