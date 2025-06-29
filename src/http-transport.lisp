@@ -6,10 +6,10 @@
   (:import-from #:lack)
   (:import-from #:sse-server)
   (:import-from #:clack-sse)
-  (:import-from #:lack.request
+  (:import-from #:lack/request
                 #:make-request
                 #:request-body-parameter)
-  (:import-from #:lack.response)
+  (:import-from #:lack/response)
   (:import-from #:40ants-mcp/server/connections)
   (:import-from #:40ants-mcp/transport/base
                 #:send-message

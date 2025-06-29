@@ -13,9 +13,6 @@
                 #:start-loop
                 #:stop-loop)
   (:import-from #:yason)
-  (:import-from #:lack.test)
-  (:import-from #:lack.request)
-  (:import-from #:lack.response)
   (:import-from #:lack/test
                 #:generate-env)
   (:import-from #:serapeum
