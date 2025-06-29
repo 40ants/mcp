@@ -7,11 +7,6 @@
                 #:make-request-handler
                 #:http-transport
                 #:transport-app)
-  (:import-from #:40ants-mcp/content/text
-                #:text-content)
-  (:import-from #:40ants-mcp/transport/base
-                #:start-loop
-                #:stop-loop)
   (:import-from #:yason)
   (:import-from #:lack/test
                 #:generate-env)
