@@ -147,7 +147,7 @@
                tools-list-response-with-cursor))
   ;; See the description and examples in the documentation:
   ;; https://modelcontextprotocol.io/docs/concepts/tools#python
-  (log:info "TOOLS/LIST was called" cursor)
+  (log:debug "TOOLS/LIST was called" cursor)
   (let ((tools
           (mapcan #'make-tool-descriptions
                   (server-tools-collections mcp-server))))

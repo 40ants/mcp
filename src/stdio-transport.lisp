@@ -44,7 +44,7 @@
     (write-line json-string (transport-output transport))
     (force-output (transport-output transport))
     ;; Log to stderr for debugging (not part of protocol)
-    (log:info "SENT: ~A" json-string)
+    (log:debug "SENT: ~A" json-string)
     (values)))
 
 
@@ -63,7 +63,7 @@
       (let ((line (read-line (transport-input transport) nil nil)))
         (when line
           ;; Log to stderr for debugging
-          (log:info "RECEIVED: ~A" line)
+          (log:debug "RECEIVED: ~A" line)
           ;; Parse JSON and return as plist for easier handling
           (push line
                 *received-messages*)
@@ -74,7 +74,7 @@
       nil)
     (error (e)
       ;; Log parsing errors to stderr
-      (log:info "ERROR parsing message: ~A" e)
+      (log:debug "ERROR parsing message: ~A" e)
       nil)))
 
 
@@ -83,15 +83,15 @@
       (let ((response (funcall message-handler message)))
         (cond
           (response
-           (log:info "Responding with" response)
+           (log:debug "Responding with" response)
            (write-string response)
            (terpri)
            (finish-output))
           (t
-           (log:info "There is no response"))))
+           (log:debug "There is no response"))))
     (error (e)
       ;; Log handler errors to stderr
-      (log:info "ERROR handling message: ~A" e))))
+      (log:debug "ERROR handling message: ~A" e))))
 
 
 (defmethod start-loop ((transport stdio-transport) message-handler)
@@ -100,12 +100,16 @@
    MESSAGE-HANDLER should be a function that takes a message string and returns a response string.
    The loop continues until transport-running-p becomes NIL or EOF is reached on input.
    Each received message is processed by the message-handler and any response is written to output."
-  (log:info "Starting STDIO transport loop...")
+  (log:debug "Starting STDIO transport loop...")
   (loop while (transport-running-p transport)
         for message = (receive-message transport)
-        when message
-          do (process-message message message-handler))
-  (log:info "STDIO transport loop ended."))
+        do (cond
+             (message
+              (process-message message message-handler))
+             (t
+              ;; Without this sleep, transport eats a whole CPU :(
+              (sleep 0.5))))
+  (log:debug "STDIO transport loop ended."))
 
 
 (defmethod stop-loop ((transport stdio-transport))

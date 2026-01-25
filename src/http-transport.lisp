@@ -55,7 +55,7 @@
   (setf (transport-lack-app obj)
         (lambda (env)
           (let ((response (handle-request obj env)))
-            (log:info "Returning" response)
+            (log:debug "Returning" response)
             (values response))))
   (values))
 
@@ -103,7 +103,7 @@
       (cond
         ((and (eq method :GET)
               (string= path-info "/mcp"))
-         (log:info "Responding with event stream" method path-info)
+         (log:debug "Responding with event stream" method path-info)
          
          (funcall *sse-handler* env))
         
@@ -117,7 +117,7 @@
                            (lack/request:make-request env)))
                 (body-string (parse-body request)))
            
-           (log:info "Processing request" body-string)
+           (log:debug "Processing request" body-string)
            
            (handler-bind ((error (lambda (e)
                                    (log:error "Error in message handler:" e)
@@ -125,12 +125,11 @@
              (with-log-unhandled ()
                (let ((response (funcall (transport-message-handler transport)
                                         body-string)))
-                 (log:info "Handler response:" response)
-                 (log:info "Handler response type:" (type-of response))
+                 (log:debug "Handler response:" response)
                  (cond
                    ;; For notifications (no id), return 202 Accepted
                    ((null response)
-                    (log:info "Handling notification")
+                    (log:debug "Handling notification")
                     (list 202
                           (list :content-type "application/json"
                                 :mcp-protocol-version *protocol-version*)
@@ -138,14 +137,14 @@
 
                    ;; For other responses
                    ((typep response 'string)
-                    (log:info "Handling string response")
+                    (log:debug "Handling string response")
                     (list 200
                           (list :content-type "application/json"
                                 :mcp-protocol-version *protocol-version*)
                           (list response)))
                    
                    ((consp response)
-                    (log:info "Handling a custom response" response)
+                    (log:debug "Handling a custom response" response)
                     (destructuring-bind (code headers body)
                         response
                       (unless (getf headers :mcp-protocol-version)
@@ -155,7 +154,7 @@
                             headers
                             (uiop:ensure-list body))))
                    (t
-                    (log:info "Unknown response type")
+                    (log:warn "Unknown response type")
                     (return-error-response :code 500 :message "Unknown response type"))))))))
         ;; Return 404 for unknown paths
         (t
@@ -167,7 +166,7 @@
 
 (defmethod start-loop ((transport http-transport) message-handler)
   "Start the HTTP server and begin processing requests."
-  (log:info "Starting HTTP transport on port" (transport-port transport))
+  (log:debug "Starting HTTP transport on port" (transport-port transport))
   (setf (transport-message-handler transport) message-handler)
   
   ;; Start the server
@@ -175,12 +174,14 @@
         (clack:clackup (transport-lack-app transport)
                        :server :hunchentoot
                        :port (transport-port transport)
-                       :use-thread nil)))
+                       :use-thread nil
+                       ;; We don't want clack to print message about it starting the server
+                       :silent t)))
 
 
 (defmethod stop-loop ((transport http-transport))
   "Stop the HTTP server."
-  (log:info "Stopping HTTP transport")
+  (log:debug "Stopping HTTP transport")
   (when (transport-server transport)
     (clack:stop (transport-server transport))
     (setf (transport-running-p transport) nil)))

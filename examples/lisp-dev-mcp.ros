@@ -19,10 +19,11 @@ exec ros -Q -- $0 "$@"
 (declaim (optimize (debug 3) (safety 3)))
 
 ;; Load required systems
-(push "~/projects/lisp/clack-sse/" asdf:*central-registry*)
-(push "~/projects/lisp/40ants-logging/" asdf:*central-registry*)
-(push "~/projects/lisp/40ants-openrpc/" asdf:*central-registry*)
-(push "~/projects/lisp/openrpc/" asdf:*central-registry*)
+;; (push "~/projects/lisp/clack/" asdf:*central-registry*)
+;; (push "~/projects/lisp/clack-sse/" asdf:*central-registry*)
+;; (push "~/projects/lisp/40ants-logging/" asdf:*central-registry*)
+;; (push "~/projects/lisp/40ants-openrpc/" asdf:*central-registry*)
+;; (push "~/projects/lisp/openrpc/" asdf:*central-registry*)
 
 (declaim (optimize (debug 3) (safety 3)))
 
@@ -134,15 +135,26 @@ exec ros -Q -- $0 "$@"
 
 (defmain (main) ((port "TCP port to listen on. If given, Streaming HTTP transport will be used.")
                  (debug "If this flag set, then a debugger will be opened when you've conntected to the server with SLY."
-                        :flag t))
+                        :flag t)
+                 (log-filename "Path to a file with log.")
+                 (verbose "Show debug messages in the log."
+                          :flag t))
   "Main entry point for the Roswell script"
-  (declare (ignore argv))
+  (let ((log-level
+          (if verbose
+            :debug
+            :info)))
+    (cond
+      (log-filename
+       (40ants-logging:setup-for-backend
+        :filename (uiop:ensure-pathname log-filename)
+        :level log-level))
+      (t
+       (40ants-logging:setup-for-cli
+        :level log-level))))
 
-  (40ants-logging:setup-for-backend
-   :filename (make-pathname :directory '(:absolute "tmp")
-                            :name "lisp-dev-mcp"
-                            :type "log")
-   :level :debug)
+  (log:config '(40ants-slynk) :warn)
+  (log:config '(sento actor-system) :warn)
 
   ;; Start SLYNK server if SLYNK_PORT environment variable is set
   (start-slynk-if-needed)
@@ -150,4 +162,8 @@ exec ros -Q -- $0 "$@"
   (when debug
     (setf jsonrpc/errors:*debug-on-error* t))
   
-  (40ants-mcp/server/definition:start-server dev-tools))
+  (40ants-mcp/server/definition:start-server dev-tools
+                                             :transport (if port
+                                                          :http
+                                                          :stdio)
+                                             :port (parse-integer port)))
