@@ -52,7 +52,7 @@
   (:param name string "A tool name")
   (:param arguments hash-table  "Arguments of a tool.")
   (:result tool-call-response)
-  (log:info "Called tool" name)
+  (log:debug "Called tool" name)
   
   (let ((tool (search-tool name (server-tools-collections mcp-server))))
     (cond

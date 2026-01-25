@@ -44,7 +44,7 @@
 
 (defun handle-message (rpc-server message)
   "Generic message handler for both STDIO and HTTP transports."
-  (log:info "Handling" message)
+  (log:debug "Handling" message)
   (restart-case
       (let ((parsed-request
               (handler-case (jsonrpc:parse-message message)
@@ -105,7 +105,7 @@
   "Start the MCP server with specified transport.
    TRANSPORT can be :stdio or :http.
    PORT is only used when transport is :http."
-  (log:info "Starting MCP server with" transport "transport and tools" tools-collections)
+  (log:debug "Starting MCP server with" transport "transport and tools" tools-collections)
 
   (let* ((rpc-server (initialize-rpc-server tools-collections)))
     ;; Create and start transport

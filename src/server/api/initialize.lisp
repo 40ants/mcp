@@ -35,5 +35,5 @@
   (:param capabilities hash-table "A map of capabilities supported by client.")
   (:param |clientInfo| hash-table "A map describing a client version.")
   (:result initialize-response)
-  (log:info "INIT was called" |protocolVersion| capabilities |clientInfo|)
+  (log:debug "INIT was called" |protocolVersion| capabilities |clientInfo|)
   (make-instance 'initialize-response))
