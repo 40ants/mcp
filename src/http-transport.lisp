@@ -27,7 +27,9 @@
 
 
 (defparameter *protocol-version*
-  "2025-03-26")
+  ;; "2025-11-25"
+  "2025-03-26"
+  )
 
 
 (defclass http-transport ()

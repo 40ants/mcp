@@ -19,7 +19,10 @@
 
 (defclass initialize-response ()
   ((|protocolVersion| :type string
-                      :initform "2025-03-26")
+                      :initform
+                      ;; "2025-11-25"
+                      "2025-03-26"
+                      )
    (capabilities :type hash-table
                  :initform (dict "tools" (dict "listChanged" t)))
    (|serverInfo| :type hash-table
