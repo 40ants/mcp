@@ -1,0 +1,383 @@
+<html lang=en>
+ <head>
+  <meta charset=UTF-8><meta name=viewport
+      content="width=device-width, initial-scale=1">
+  <title>40ants-mcp - The framework for building MCP servers and clients in Common 
+   Lisp.</title>
+  <link rel=alternate
+        href="https://40ants.com/mcp/changelog.xml"
+        type="application/rss+xml">
+  <link rel=stylesheet type="text/css"
+        href=theme.css>
+  <script type="text/javascript" src=jquery.js></script>
+  <script type="text/javascript" src=toc.js></script>
+  <script type="text/javascript">$(document).ready(function() {$('a:has(img)').css('border-bottom', 'none')})</script>
+  <link rel=stylesheet type="text/css"
+      href=highlight.min.css>
+  <script type="text/javascript"
+          src=highlight.min.js></script>
+  <script type="text/javascript">hljs.highlightAll();</script>
+<style type="text/css">
+/* Стили для сворачиваемого меню */
+.sidebar ul ul {
+  display: none; /* Скрываем все подменю по умолчанию */
+  margin-left: 0.5em;
+}
+
+.sidebar li.expanded > ul {
+  display: block; /* Показываем подменю для развернутых элементов */
+}
+
+/* Стили для пунктов с подменю */
+.sidebar li.has-children > a {
+  cursor: pointer;
+  position: relative;
+  padding-left: 1.2em;
+}
+
+.sidebar li.has-children > p > a {
+  position: relative;
+  left: -1rem;
+}
+
+.sidebar li.has-children > p > a::before {
+  content:"►";
+}
+
+.sidebar li.has-children.expanded > p > a::before {
+  content: "▼";
+  position: relative;
+  left: -0.08rem;
+}
+
+/* Подсветка активного пункта */
+.sidebar li.active > a {
+  font-weight: bold;
+}
+
+/* Если активная страница находится в подменю, раскрываем родителя */
+.sidebar li.active-parent {
+  font-weight: normal;
+}
+
+.sidebar li.active-parent > ul {
+  display: block;
+}
+</style>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FL71WXK73K"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-FL71WXK73K');
+    </script>
+
+    <!-- Yandex.Metrika counter -->
+    <script type="text/javascript" >
+       (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+       m[i].l=1*new Date();
+       for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+       k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+       (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+
+       ym(42462884, "init", {
+            clickmap:true,
+            trackLinks:true,
+            accurateTrackBounce:true
+       });
+    </script>
+    <noscript><div><img src="https://mc.yandex.ru/watch/42462884" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+    <!-- /Yandex.Metrika counter -->
+
+ </head>
+ <body>
+  <div class=page><a id=fork-me href="https://github.com/40ants/mcp">Fork me on GitHub</a>
+   <div class=navbar>
+    <div class=navbar-inner>
+     <a class=brand href="/">
+      <img class=logo
+           src="https://40ants.com/img/logo.svg"></a>
+     <ul class=nav>
+      <li><a href="/posts/">Blog</a>
+      <li><a href="/ru/posts/">Blog (RU)</a>
+      <li><a href="/tips/">Lisp Tips</a>
+      <li><a href="/projects/">Our Projects</a>
+      <li><a href="/about/">About</a>
+     </ul>
+    </div>
+   </div>
+   <input type=checkbox id=sidebar-check>
+   <label for=sidebar-check>
+    <div id=sidebar-trigger>
+     <span></span><span></span><span></span>
+    </div></label><div class=sidebar><div class=header><form class=search method=GET action="search/">
+      <input type=text name=q>
+      <input type=submit value=Search><span id=search-progress></span>
+     </form>
+    </div><div class=content><div class=page-toc><ul><li><p><a href="#x-2840ANTS-MCP-DOCS-2FINDEX-3A-40INDEX-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-40INDEX-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">40ants-mcp - The framework for building MCP servers and clients in Common Lisp.</a></p><ul><li><p><a href="#40-ants-mcp-asdf-system-details" data-document="" data-node="40-ants-mcp-asdf-system-details">40ANTS-MCP ASDF System Details</a></p></li><li><p><a href="#x-2840ANTS-MCP-DOCS-2FINDEX-3A-40ABOUT-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-40ABOUT-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">About</a></p><ul><li><p><a href="#features" data-document="" data-node="features">Features</a></p></li><li><p><a href="#roadmap" data-document="" data-node="roadmap">Roadmap</a></p></li></ul></li><li><p><a href="#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-40INSTALLATION-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-40INSTALLATION-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">Installation</a></p></li><li><p><a href="#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-40USAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-40USAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">Usage</a></p><ul><li><p><a href="#running-as-a-script" data-document="" data-node="running-as-a-script">Running as a Script</a></p></li></ul></li><li><p><a href="#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-40API-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-40API-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">API</a></p><ul><li><p><a href="#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FCONTENT-2FBASE-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FCONTENT-2FBASE-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">40ANTS-MCP/CONTENT/BASE</a></p><ul><li><p><a href="#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FCONTENT-2FBASE-3FClasses-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FCONTENT-2FBASE-3FClasses-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">Classes</a></p><ul><li><p><a href="#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FCONTENT-2FBASE-24CONTENT-3FCLASS-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FCONTENT-2FBASE-24CONTENT-3FCLASS-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">CONTENT</a></p></li></ul></li></ul></li><li><p><a href="#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FCONTENT-2FTEXT-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FCONTENT-2FTEXT-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">40ANTS-MCP/CONTENT/TEXT</a></p><ul><li><p><a href="#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FCONTENT-2FTEXT-3FClasses-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FCONTENT-2FTEXT-3FClasses-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">Classes</a></p><ul><li><p><a href="#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FCONTENT-2FTEXT-24TEXT-CONTENT-3FCLASS-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FCONTENT-2FTEXT-24TEXT-CONTENT-3FCLASS-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">TEXT-CONTENT</a></p></li></ul></li></ul></li><li><p><a href="#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FHTTP-TRANSPORT-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FHTTP-TRANSPORT-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">40ANTS-MCP/HTTP-TRANSPORT</a></p><ul><li><p><a href="#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FHTTP-TRANSPORT-3FClasses-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FHTTP-TRANSPORT-3FClasses-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">Classes</a></p><ul><li><p><a href="#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FHTTP-TRANSPORT-24HTTP-TRANSPORT-3FCLASS-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FHTTP-TRANSPORT-24HTTP-TRANSPORT-3FCLASS-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">HTTP-TRANSPORT</a></p></li></ul></li></ul></li><li><p><a href="#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FSERVER-2FDEFINITION-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FSERVER-2FDEFINITION-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">40ANTS-MCP/SERVER/DEFINITION</a></p><ul><li><p><a href="#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FSERVER-2FDEFINITION-3FClasses-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FSERVER-2FDEFINITION-3FClasses-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">Classes</a></p><ul><li><p><a href="#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FSERVER-2FDEFINITION-24MCP-SERVER-3FCLASS-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FSERVER-2FDEFINITION-24MCP-SERVER-3FCLASS-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">MCP-SERVER</a></p></li></ul></li><li><p><a href="#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FSERVER-2FDEFINITION-3FFunctions-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FSERVER-2FDEFINITION-3FFunctions-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">Functions</a></p></li></ul></li><li><p><a href="#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FSERVER-2FERRORS-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FSERVER-2FERRORS-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">40ANTS-MCP/SERVER/ERRORS</a></p><ul><li><p><a href="#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FSERVER-2FERRORS-3FClasses-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FSERVER-2FERRORS-3FClasses-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">Classes</a></p><ul><li><p><a href="#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FSERVER-2FERRORS-24TOOL-ERROR-3FCLASS-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FSERVER-2FERRORS-24TOOL-ERROR-3FCLASS-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">TOOL-ERROR</a></p></li></ul></li></ul></li><li><p><a href="#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FSTDIO-TRANSPORT-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FSTDIO-TRANSPORT-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">40ANTS-MCP/STDIO-TRANSPORT</a></p><ul><li><p><a href="#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FSTDIO-TRANSPORT-3FClasses-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FSTDIO-TRANSPORT-3FClasses-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">Classes</a></p><ul><li><p><a href="#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FSTDIO-TRANSPORT-24STDIO-TRANSPORT-3FCLASS-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FSTDIO-TRANSPORT-24STDIO-TRANSPORT-3FCLASS-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">STDIO-TRANSPORT</a></p></li></ul></li><li><p><a href="#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FSTDIO-TRANSPORT-3FGenerics-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FSTDIO-TRANSPORT-3FGenerics-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">Generics</a></p></li></ul></li><li><p><a href="#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FTOOLS-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FTOOLS-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">40ANTS-MCP/TOOLS</a></p><ul><li><p><a href="#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FTOOLS-3FMacros-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FTOOLS-3FMacros-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">Macros</a></p></li></ul></li><li><p><a href="#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FTRANSPORT-2FBASE-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FTRANSPORT-2FBASE-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">40ANTS-MCP/TRANSPORT/BASE</a></p><ul><li><p><a href="#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FTRANSPORT-2FBASE-3FGenerics-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FTRANSPORT-2FBASE-3FGenerics-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">Generics</a></p></li></ul></li></ul></li></ul></li><li><p><a href="changelog/#x-2840ANTS-MCP-DOCS-2FCHANGELOG-3A-40CHANGELOG-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="changelog/" data-node="x-2840ANTS-MCP-DOCS-2FCHANGELOG-3A-40CHANGELOG-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">ChangeLog</a></p></li></ul>
+     </div>
+    </div><div class=footer>
+     <a href="https://40ants.com/doc">[generated by 40ANTS-DOC]</a>
+    </div>
+   </div><div class=content role=main><h1>40ants-mcp - The framework for building MCP servers and clients in Common Lisp.<a class=header-link
+     href=#x-2840ANTS-MCP-DOCS-2FINDEX-3A-40INDEX-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29
+     title="Permalink to this headline"
+     id=x-2840ANTS-MCP-DOCS-2FINDEX-3A-40INDEX-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29></a></h1><h2 id="40-ants-mcp-asdf-system-details">40ANTS-MCP ASDF System Details</h2><ul><li><p>Description: The framework for building <code>MCP</code> servers and clients in Common Lisp.</p></li><li><p>Licence: Unlicense</p></li><li><p>Author: Alexander Artemenko &lt;svetlyak.40wt@gmail.com&gt;</p></li><li><p>Homepage: <a href="https://40ants.com/mcp/">https://40ants.com/mcp/</a></p></li><li><p>Bug tracker: <a href="https://github.com/40ants/mcp/issues">https://github.com/40ants/mcp/issues</a></p></li><li><p>Source control: <a href="https://github.com/40ants/mcp">GIT</a></p></li><li><p>Depends on: <a href="https://quickdocs.org/alexandria">alexandria</a>, <a href="https://quickdocs.org/bordeaux-threads">bordeaux-threads</a>, <a href="https://quickdocs.org/cl-ppcre">cl-ppcre</a>, <a href="https://quickdocs.org/clack">clack</a>, <a href="https://quickdocs.org/clack-sse">clack-sse</a>, <a href="https://quickdocs.org/jsonrpc">jsonrpc</a>, <a href="https://quickdocs.org/lack">lack</a>, <a href="https://quickdocs.org/lack-request">lack-request</a>, <a href="https://quickdocs.org/lack-response">lack-response</a>, <a href="https://quickdocs.org/local-time">local-time</a>, <a href="https://quickdocs.org/log4cl">log4cl</a>, <a href="https://quickdocs.org/log4cl-extras">log4cl-extras</a>, <a href="https://quickdocs.org/openrpc-client">openrpc-client</a>, <a href="https://quickdocs.org/openrpc-server">openrpc-server</a>, <a href="https://quickdocs.org/sento">sento</a>, <a href="https://quickdocs.org/serapeum">serapeum</a>, <a href="https://quickdocs.org/sse-server">sse-server</a>, <a href="https://quickdocs.org/trivial-gray-streams">trivial-gray-streams</a>, <a href="https://quickdocs.org/uuid">uuid</a>, <a href="https://quickdocs.org/yason">yason</a></p></li></ul><p><a href="https://github.com/40ants/mcp/actions"><img src="https://github-actions.40ants.com/40ants/mcp/matrix.svg?only=ci.run-tests"/></a></p><p><img src="http://quickdocs.org/badge/40ants-mcp.svg"/></p><h2>About<a class=header-link
+     href=#x-2840ANTS-MCP-DOCS-2FINDEX-3A-40ABOUT-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29
+     title="Permalink to this headline"
+     id=x-2840ANTS-MCP-DOCS-2FINDEX-3A-40ABOUT-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29></a></h2><p>A comprehensive framework for building <a href="https://modelcontextprotocol.io/">Model Context Protocol (MCP)</a> servers in Common Lisp. This library provides a complete implementation of the <code>MCP</code> specification with an easy-to-use <code>API</code> for creating servers that can interact with <code>AI</code> assistants like Claude Desktop.</p><p><b>Active development is ongoing and the interface is likely to change.</b></p><h3 id="features">Features</h3><ul><li><p>✅ <b><code>STDIO</code> Transport</b>: Native support for <code>STDIO</code>-based communication</p></li><li><p>✅ <b>Streamable<code>HTTP</code> Transport</b>: Allowing to create remotely hosted <code>MCP</code> servers</p></li><li><p>✅ <b>Tools System</b>: Register and execute custom tools with <code>JSON</code> Schema validation</p></li><li><p>✅ <b>Built on Open<code>RPC</code></b>: Leverages the robust <a href="https://40ants.com/openrpc/">40ants OpenRPC library</a></p></li><li><p>✅ <b><code>CLOS</code>-based</b>: Object-oriented design with proper encapsulation</p></li><li><p>✅ <b>Easy Integration</b>: Simple <code>API</code> for adding functionality</p></li><li><p>✅ <b>Error Handling</b>: Comprehensive error management with proper <code>JSON-RPC</code> error codes</p></li><li><p>✅ <b>Interactive Editing</b>: <code>MCP</code> tools can be edited and updated on the fly, using <code>REPL</code> driven approach</p></li></ul><h3 id="roadmap">Roadmap</h3><ul><li><p>🔄 <b>Full <code>MCP</code> Specification Support</b>: Complete implementation of <code>MCP</code> protocol version 2025-06-18</p></li><li><p>🔄 <b>Resources System</b>: Serve dynamic and static resources via <code>URI</code></p></li><li><p>🔄 <b>Prompts System</b>: Provide prompt templates with argument interpolation</p></li><li><p>🔄 <b><code>MCP</code> Client Protocol</b>: Implement client-side protocol for connecting to <code>MCP</code> servers</p></li></ul><h2>Installation<a class=header-link
+     href=#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-40INSTALLATION-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29
+     title="Permalink to this headline"
+     id=x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-40INSTALLATION-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29></a></h2><p>You can install this library from Quicklisp, but you want to receive updates quickly, then install it from Ultralisp.org:</p><pre><code class="">(ql-dist:install-dist &quot;http://dist.ultralisp.org/&quot;
+                      :prompt nil)
+(ql:quickload :40ants-mcp)</code></pre><h2>Usage<a class=header-link
+     href=#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-40USAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29
+     title="Permalink to this headline"
+     id=x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-40USAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29></a></h2><p>Here's a quick example of how to create an <code>MCP</code> server with custom tools:</p><pre><code class="lisp">(defpackage #:my-mcp-server
+  (:use #:cl)
+  (:import-from #:40ants-mcp/content/text
+                #:text-content)
+  (:import-from #:openrpc-server))
+
+(in-package #:my-mcp-server)
+
+;; Define your API
+(openrpc-server:define-api (my-tools :title &quot;My Custom Tools&quot;))
+
+;; Define a tool that adds two numbers
+(40ants-mcp/tools:define-tool (my-tools add) (a b)
+  (:summary &quot;Adds two numbers and returns the result.&quot;)
+  (:param a integer &quot;First number to add.&quot;)
+  (:param b integer &quot;Second number to add.&quot;)
+  (:result (soft-list-of text-content))
+  (list (make-instance 'text-content
+                      :text (format nil &quot;The sum of ~A and ~A is: ~A&quot;
+                                  a b (+ a b)))))
+
+;; Start the server
+(40ants-mcp/server/definition:start-server my-tools)</code></pre><h3 id="running-as-a-script">Running as a Script</h3><p>For production use, you can create a Roswell script. Create a file <code>my-mcp.ros</code>:</p><pre><code class="lisp">#!/bin/sh
+#|-*- mode:lisp -*-|#
+#|
+exec ros -Q -- $0 \&quot;$@\&quot;
+|#
+
+(ql:quickload '(:40ants-mcp :alexandria) :silent t)
+
+;; Your package and tool definitions here...
+
+(defun main (&amp;rest argv)
+  (declare (ignore argv))
+  (40ants-mcp/server/definition:start-server my-tools))</code></pre><p>Build and run the script:</p><pre><code class="bash"># Build the script
+ros build my-mcp.ros
+
+# Run the server
+./my-mcp
+
+# With remote debugging support
+SLYNK_PORT=4005 ./my-mcp</code></pre><p>Each tool you define should return a list of content items. The most common content type is <code>text-content</code>, but you can also return other types defined in the <code>MCP</code> specification.</p><p>For more examples, check the <code>examples/</code> directory in the source code.</p><h2>API<a class=header-link
+     href=#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-40API-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29
+     title="Permalink to this headline"
+     id=x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-40API-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29></a></h2><h3>40ANTS-MCP/CONTENT/BASE<a class=header-link
+     href=#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FCONTENT-2FBASE-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29
+     title="Permalink to this headline"
+     id=x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FCONTENT-2FBASE-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29></a></h3><div class=reference-bullet><div class=reference-bullet-header><a class=locative-type href="https://github.com/40ants/mcp/blob/c50c1c0d32c28fc095570154db59dc66adeada21/src/content/base.lisp#L1">package</a><div class=reference-object><div class=object-name><a href=#x-28-23A-28-2823-29-20BASE-CHAR-20-2E-20-2240ANTS-MCP-2FCONTENT-2FBASE-22-29-20PACKAGE-29 id=x-28-23A-28-2823-29-20BASE-CHAR-20-2E-20-2240ANTS-MCP-2FCONTENT-2FBASE-22-29-20PACKAGE-29>40ants-mcp/content/base</a></div></div><a class=bullet-link href=#x-28-23A-28-2823-29-20BASE-CHAR-20-2E-20-2240ANTS-MCP-2FCONTENT-2FBASE-22-29-20PACKAGE-29></a></div></div><h4>Classes<a class=header-link
+     href=#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FCONTENT-2FBASE-3FClasses-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29
+     title="Permalink to this headline"
+     id=x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FCONTENT-2FBASE-3FClasses-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29></a></h4><h5>CONTENT<a class=header-link
+     href=#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FCONTENT-2FBASE-24CONTENT-3FCLASS-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29
+     title="Permalink to this headline"
+     id=x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FCONTENT-2FBASE-24CONTENT-3FCLASS-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29></a></h5><div class=reference-bullet><div class=reference-bullet-header><a class=locative-type href="https://github.com/40ants/mcp/blob/c50c1c0d32c28fc095570154db59dc66adeada21/src/content/base.lisp#L8">class</a><div class=reference-object><div class=object-name><a href=#x-2840ANTS-MCP-2FCONTENT-2FBASE-3ACONTENT-20CLASS-29 id=x-2840ANTS-MCP-2FCONTENT-2FBASE-3ACONTENT-20CLASS-29>40ants-mcp/content/base:content</a></div><div class=object-args><span class=locative-args></span></div></div><a class=bullet-link href=#x-2840ANTS-MCP-2FCONTENT-2FBASE-3ACONTENT-20CLASS-29></a></div></div><p><b>Readers</b></p><div class=reference-bullet><div class=reference-bullet-header><a class=locative-type href="https://github.com/40ants/mcp/blob/c50c1c0d32c28fc095570154db59dc66adeada21/src/content/base.lisp#L9">reader</a><div class=reference-object><div class=object-name><a href=#x-2840ANTS-MCP-2FCONTENT-2FBASE-3ACONTENT-TYPE-20-2840ANTS-DOC-2FLOCATIVES-3AREADER-2040ANTS-MCP-2FCONTENT-2FBASE-3ACONTENT-29-29 id=x-2840ANTS-MCP-2FCONTENT-2FBASE-3ACONTENT-TYPE-20-2840ANTS-DOC-2FLOCATIVES-3AREADER-2040ANTS-MCP-2FCONTENT-2FBASE-3ACONTENT-29-29>40ants-mcp/content/base:content-type</a></div><div class=object-args><span class=locative-args></span><span class=locative-args>(:TYPE = &quot;unknown&quot;)</span></div></div><a class=bullet-link href=#x-2840ANTS-MCP-2FCONTENT-2FBASE-3ACONTENT-TYPE-20-2840ANTS-DOC-2FLOCATIVES-3AREADER-2040ANTS-MCP-2FCONTENT-2FBASE-3ACONTENT-29-29></a></div></div><h3>40ANTS-MCP/CONTENT/TEXT<a class=header-link
+     href=#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FCONTENT-2FTEXT-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29
+     title="Permalink to this headline"
+     id=x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FCONTENT-2FTEXT-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29></a></h3><div class=reference-bullet><div class=reference-bullet-header><a class=locative-type href="https://github.com/40ants/mcp/blob/c50c1c0d32c28fc095570154db59dc66adeada21/src/content/text.lisp#L1">package</a><div class=reference-object><div class=object-name><a href=#x-28-23A-28-2823-29-20BASE-CHAR-20-2E-20-2240ANTS-MCP-2FCONTENT-2FTEXT-22-29-20PACKAGE-29 id=x-28-23A-28-2823-29-20BASE-CHAR-20-2E-20-2240ANTS-MCP-2FCONTENT-2FTEXT-22-29-20PACKAGE-29>40ants-mcp/content/text</a></div></div><a class=bullet-link href=#x-28-23A-28-2823-29-20BASE-CHAR-20-2E-20-2240ANTS-MCP-2FCONTENT-2FTEXT-22-29-20PACKAGE-29></a></div></div><h4>Classes<a class=header-link
+     href=#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FCONTENT-2FTEXT-3FClasses-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29
+     title="Permalink to this headline"
+     id=x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FCONTENT-2FTEXT-3FClasses-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29></a></h4><h5>TEXT-CONTENT<a class=header-link
+     href=#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FCONTENT-2FTEXT-24TEXT-CONTENT-3FCLASS-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29
+     title="Permalink to this headline"
+     id=x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FCONTENT-2FTEXT-24TEXT-CONTENT-3FCLASS-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29></a></h5><div class=reference-bullet><div class=reference-bullet-header><a class=locative-type href="https://github.com/40ants/mcp/blob/c50c1c0d32c28fc095570154db59dc66adeada21/src/content/text.lisp#L11">class</a><div class=reference-object><div class=object-name><a href=#x-2840ANTS-MCP-2FCONTENT-2FTEXT-3ATEXT-CONTENT-20CLASS-29 id=x-2840ANTS-MCP-2FCONTENT-2FTEXT-3ATEXT-CONTENT-20CLASS-29>40ants-mcp/content/text:text-content</a></div><div class=object-args><span class=locative-args></span></div></div><a class=bullet-link href=#x-2840ANTS-MCP-2FCONTENT-2FTEXT-3ATEXT-CONTENT-20CLASS-29></a></div></div><p><b>Readers</b></p><div class=reference-bullet><div class=reference-bullet-header><a class=locative-type href="https://github.com/40ants/mcp/blob/c50c1c0d32c28fc095570154db59dc66adeada21/src/content/text.lisp#L12">reader</a><div class=reference-object><div class=object-name><a href=#x-2840ANTS-MCP-2FCONTENT-2FTEXT-3ACONTENT-TEXT-20-2840ANTS-DOC-2FLOCATIVES-3AREADER-2040ANTS-MCP-2FCONTENT-2FTEXT-3ATEXT-CONTENT-29-29 id=x-2840ANTS-MCP-2FCONTENT-2FTEXT-3ACONTENT-TEXT-20-2840ANTS-DOC-2FLOCATIVES-3AREADER-2040ANTS-MCP-2FCONTENT-2FTEXT-3ATEXT-CONTENT-29-29>40ants-mcp/content/text:content-text</a></div><div class=object-args><span class=locative-args></span><span class=locative-args>(:text)</span></div></div><a class=bullet-link href=#x-2840ANTS-MCP-2FCONTENT-2FTEXT-3ACONTENT-TEXT-20-2840ANTS-DOC-2FLOCATIVES-3AREADER-2040ANTS-MCP-2FCONTENT-2FTEXT-3ATEXT-CONTENT-29-29></a></div></div><h3>40ANTS-MCP/HTTP-TRANSPORT<a class=header-link
+     href=#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FHTTP-TRANSPORT-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29
+     title="Permalink to this headline"
+     id=x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FHTTP-TRANSPORT-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29></a></h3><div class=reference-bullet><div class=reference-bullet-header><a class=locative-type href="https://github.com/40ants/mcp/blob/c50c1c0d32c28fc095570154db59dc66adeada21/src/http-transport.lisp#L1">package</a><div class=reference-object><div class=object-name><a href=#x-28-23A-28-2825-29-20BASE-CHAR-20-2E-20-2240ANTS-MCP-2FHTTP-TRANSPORT-22-29-20PACKAGE-29 id=x-28-23A-28-2825-29-20BASE-CHAR-20-2E-20-2240ANTS-MCP-2FHTTP-TRANSPORT-22-29-20PACKAGE-29>40ants-mcp/http-transport</a></div></div><a class=bullet-link href=#x-28-23A-28-2825-29-20BASE-CHAR-20-2E-20-2240ANTS-MCP-2FHTTP-TRANSPORT-22-29-20PACKAGE-29></a></div></div><h4>Classes<a class=header-link
+     href=#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FHTTP-TRANSPORT-3FClasses-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29
+     title="Permalink to this headline"
+     id=x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FHTTP-TRANSPORT-3FClasses-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29></a></h4><h5>HTTP-TRANSPORT<a class=header-link
+     href=#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FHTTP-TRANSPORT-24HTTP-TRANSPORT-3FCLASS-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29
+     title="Permalink to this headline"
+     id=x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FHTTP-TRANSPORT-24HTTP-TRANSPORT-3FCLASS-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29></a></h5><div class=reference-bullet><div class=reference-bullet-header><a class=locative-type href="https://github.com/40ants/mcp/blob/c50c1c0d32c28fc095570154db59dc66adeada21/src/http-transport.lisp#L35">class</a><div class=reference-object><div class=object-name><a href=#x-2840ANTS-MCP-2FHTTP-TRANSPORT-3AHTTP-TRANSPORT-20CLASS-29 id=x-2840ANTS-MCP-2FHTTP-TRANSPORT-3AHTTP-TRANSPORT-20CLASS-29>40ants-mcp/http-transport:http-transport</a></div><div class=object-args><span class=locative-args></span></div></div><a class=bullet-link href=#x-2840ANTS-MCP-2FHTTP-TRANSPORT-3AHTTP-TRANSPORT-20CLASS-29></a></div><div class=bullet-content><p><code>HTTP</code> transport implementation for <code>MCP</code> (Model Context Protocol) communication.
+This class handles <code>JSON-RPC</code> message exchange via <code>HTTP</code> <code>POST</code> requests.</p></div></div><p><b>Readers</b></p><div class=reference-bullet><div class=reference-bullet-header><a class=locative-type href="https://github.com/40ants/mcp/blob/c50c1c0d32c28fc095570154db59dc66adeada21/src/http-transport.lisp#L40">reader</a><div class=reference-object><div class=object-name><a href=#x-2840ANTS-MCP-2FHTTP-TRANSPORT-3ATRANSPORT-LACK-APP-20-2840ANTS-DOC-2FLOCATIVES-3AREADER-2040ANTS-MCP-2FHTTP-TRANSPORT-3AHTTP-TRANSPORT-29-29 id=x-2840ANTS-MCP-2FHTTP-TRANSPORT-3ATRANSPORT-LACK-APP-20-2840ANTS-DOC-2FLOCATIVES-3AREADER-2040ANTS-MCP-2FHTTP-TRANSPORT-3AHTTP-TRANSPORT-29-29>40ants-mcp/http-transport:transport-lack-app</a></div><div class=object-args><span class=locative-args></span><span class=locative-args>()</span></div></div><a class=bullet-link href=#x-2840ANTS-MCP-2FHTTP-TRANSPORT-3ATRANSPORT-LACK-APP-20-2840ANTS-DOC-2FLOCATIVES-3AREADER-2040ANTS-MCP-2FHTTP-TRANSPORT-3AHTTP-TRANSPORT-29-29></a></div><div class=bullet-content><p>Lack application instance</p></div></div><div class=reference-bullet><div class=reference-bullet-header><a class=locative-type href="https://github.com/40ants/mcp/blob/c50c1c0d32c28fc095570154db59dc66adeada21/src/http-transport.lisp#L44">reader</a><div class=reference-object><div class=object-name><a href=#x-2840ANTS-MCP-2FHTTP-TRANSPORT-3ATRANSPORT-MESSAGE-HANDLER-20-2840ANTS-DOC-2FLOCATIVES-3AREADER-2040ANTS-MCP-2FHTTP-TRANSPORT-3AHTTP-TRANSPORT-29-29 id=x-2840ANTS-MCP-2FHTTP-TRANSPORT-3ATRANSPORT-MESSAGE-HANDLER-20-2840ANTS-DOC-2FLOCATIVES-3AREADER-2040ANTS-MCP-2FHTTP-TRANSPORT-3AHTTP-TRANSPORT-29-29>40ants-mcp/http-transport:transport-message-handler</a></div><div class=object-args><span class=locative-args></span><span class=locative-args>()</span></div></div><a class=bullet-link href=#x-2840ANTS-MCP-2FHTTP-TRANSPORT-3ATRANSPORT-MESSAGE-HANDLER-20-2840ANTS-DOC-2FLOCATIVES-3AREADER-2040ANTS-MCP-2FHTTP-TRANSPORT-3AHTTP-TRANSPORT-29-29></a></div><div class=bullet-content><p>Function to handle incoming messages</p></div></div><div class=reference-bullet><div class=reference-bullet-header><a class=locative-type href="https://github.com/40ants/mcp/blob/c50c1c0d32c28fc095570154db59dc66adeada21/src/http-transport.lisp#L36">reader</a><div class=reference-object><div class=object-name><a href=#x-2840ANTS-MCP-2FHTTP-TRANSPORT-3ATRANSPORT-PORT-20-2840ANTS-DOC-2FLOCATIVES-3AREADER-2040ANTS-MCP-2FHTTP-TRANSPORT-3AHTTP-TRANSPORT-29-29 id=x-2840ANTS-MCP-2FHTTP-TRANSPORT-3ATRANSPORT-PORT-20-2840ANTS-DOC-2FLOCATIVES-3AREADER-2040ANTS-MCP-2FHTTP-TRANSPORT-3AHTTP-TRANSPORT-29-29>40ants-mcp/http-transport:transport-port</a></div><div class=object-args><span class=locative-args></span><span class=locative-args>(:port = 8080)</span></div></div><a class=bullet-link href=#x-2840ANTS-MCP-2FHTTP-TRANSPORT-3ATRANSPORT-PORT-20-2840ANTS-DOC-2FLOCATIVES-3AREADER-2040ANTS-MCP-2FHTTP-TRANSPORT-3AHTTP-TRANSPORT-29-29></a></div><div class=bullet-content><p>Port number to listen on.</p></div></div><div class=reference-bullet><div class=reference-bullet-header><a class=locative-type href="https://github.com/40ants/mcp/blob/c50c1c0d32c28fc095570154db59dc66adeada21/src/http-transport.lisp#L46">reader</a><div class=reference-object><div class=object-name><a href=#x-2840ANTS-MCP-2FHTTP-TRANSPORT-3ATRANSPORT-RUNNING-P-20-2840ANTS-DOC-2FLOCATIVES-3AREADER-2040ANTS-MCP-2FHTTP-TRANSPORT-3AHTTP-TRANSPORT-29-29 id=x-2840ANTS-MCP-2FHTTP-TRANSPORT-3ATRANSPORT-RUNNING-P-20-2840ANTS-DOC-2FLOCATIVES-3AREADER-2040ANTS-MCP-2FHTTP-TRANSPORT-3AHTTP-TRANSPORT-29-29>40ants-mcp/http-transport:transport-running-p</a></div><div class=object-args><span class=locative-args></span><span class=locative-args>(= t)</span></div></div><a class=bullet-link href=#x-2840ANTS-MCP-2FHTTP-TRANSPORT-3ATRANSPORT-RUNNING-P-20-2840ANTS-DOC-2FLOCATIVES-3AREADER-2040ANTS-MCP-2FHTTP-TRANSPORT-3AHTTP-TRANSPORT-29-29></a></div><div class=bullet-content><p>Flag indicating if transport is active</p></div></div><div class=reference-bullet><div class=reference-bullet-header><a class=locative-type href="https://github.com/40ants/mcp/blob/c50c1c0d32c28fc095570154db59dc66adeada21/src/http-transport.lisp#L42">reader</a><div class=reference-object><div class=object-name><a href=#x-2840ANTS-MCP-2FHTTP-TRANSPORT-3ATRANSPORT-SERVER-20-2840ANTS-DOC-2FLOCATIVES-3AREADER-2040ANTS-MCP-2FHTTP-TRANSPORT-3AHTTP-TRANSPORT-29-29 id=x-2840ANTS-MCP-2FHTTP-TRANSPORT-3ATRANSPORT-SERVER-20-2840ANTS-DOC-2FLOCATIVES-3AREADER-2040ANTS-MCP-2FHTTP-TRANSPORT-3AHTTP-TRANSPORT-29-29>40ants-mcp/http-transport:transport-server</a></div><div class=object-args><span class=locative-args></span><span class=locative-args>()</span></div></div><a class=bullet-link href=#x-2840ANTS-MCP-2FHTTP-TRANSPORT-3ATRANSPORT-SERVER-20-2840ANTS-DOC-2FLOCATIVES-3AREADER-2040ANTS-MCP-2FHTTP-TRANSPORT-3AHTTP-TRANSPORT-29-29></a></div><div class=bullet-content><p>Clack server instance</p></div></div><p><b>Accessors</b></p><div class=reference-bullet><div class=reference-bullet-header><a class=locative-type href="https://github.com/40ants/mcp/blob/c50c1c0d32c28fc095570154db59dc66adeada21/src/http-transport.lisp#L40">accessor</a><div class=reference-object><div class=object-name><a href=#x-2840ANTS-MCP-2FHTTP-TRANSPORT-3ATRANSPORT-LACK-APP-20-2840ANTS-DOC-2FLOCATIVES-3AACCESSOR-2040ANTS-MCP-2FHTTP-TRANSPORT-3AHTTP-TRANSPORT-29-29 id=x-2840ANTS-MCP-2FHTTP-TRANSPORT-3ATRANSPORT-LACK-APP-20-2840ANTS-DOC-2FLOCATIVES-3AACCESSOR-2040ANTS-MCP-2FHTTP-TRANSPORT-3AHTTP-TRANSPORT-29-29>40ants-mcp/http-transport:transport-lack-app</a></div><div class=object-args><span class=locative-args></span><span class=locative-args>()</span></div></div><a class=bullet-link href=#x-2840ANTS-MCP-2FHTTP-TRANSPORT-3ATRANSPORT-LACK-APP-20-2840ANTS-DOC-2FLOCATIVES-3AACCESSOR-2040ANTS-MCP-2FHTTP-TRANSPORT-3AHTTP-TRANSPORT-29-29></a></div><div class=bullet-content><p>Lack application instance</p></div></div><div class=reference-bullet><div class=reference-bullet-header><a class=locative-type href="https://github.com/40ants/mcp/blob/c50c1c0d32c28fc095570154db59dc66adeada21/src/http-transport.lisp#L44">accessor</a><div class=reference-object><div class=object-name><a href=#x-2840ANTS-MCP-2FHTTP-TRANSPORT-3ATRANSPORT-MESSAGE-HANDLER-20-2840ANTS-DOC-2FLOCATIVES-3AACCESSOR-2040ANTS-MCP-2FHTTP-TRANSPORT-3AHTTP-TRANSPORT-29-29 id=x-2840ANTS-MCP-2FHTTP-TRANSPORT-3ATRANSPORT-MESSAGE-HANDLER-20-2840ANTS-DOC-2FLOCATIVES-3AACCESSOR-2040ANTS-MCP-2FHTTP-TRANSPORT-3AHTTP-TRANSPORT-29-29>40ants-mcp/http-transport:transport-message-handler</a></div><div class=object-args><span class=locative-args></span><span class=locative-args>()</span></div></div><a class=bullet-link href=#x-2840ANTS-MCP-2FHTTP-TRANSPORT-3ATRANSPORT-MESSAGE-HANDLER-20-2840ANTS-DOC-2FLOCATIVES-3AACCESSOR-2040ANTS-MCP-2FHTTP-TRANSPORT-3AHTTP-TRANSPORT-29-29></a></div><div class=bullet-content><p>Function to handle incoming messages</p></div></div><div class=reference-bullet><div class=reference-bullet-header><a class=locative-type href="https://github.com/40ants/mcp/blob/c50c1c0d32c28fc095570154db59dc66adeada21/src/http-transport.lisp#L46">accessor</a><div class=reference-object><div class=object-name><a href=#x-2840ANTS-MCP-2FHTTP-TRANSPORT-3ATRANSPORT-RUNNING-P-20-2840ANTS-DOC-2FLOCATIVES-3AACCESSOR-2040ANTS-MCP-2FHTTP-TRANSPORT-3AHTTP-TRANSPORT-29-29 id=x-2840ANTS-MCP-2FHTTP-TRANSPORT-3ATRANSPORT-RUNNING-P-20-2840ANTS-DOC-2FLOCATIVES-3AACCESSOR-2040ANTS-MCP-2FHTTP-TRANSPORT-3AHTTP-TRANSPORT-29-29>40ants-mcp/http-transport:transport-running-p</a></div><div class=object-args><span class=locative-args></span><span class=locative-args>(= t)</span></div></div><a class=bullet-link href=#x-2840ANTS-MCP-2FHTTP-TRANSPORT-3ATRANSPORT-RUNNING-P-20-2840ANTS-DOC-2FLOCATIVES-3AACCESSOR-2040ANTS-MCP-2FHTTP-TRANSPORT-3AHTTP-TRANSPORT-29-29></a></div><div class=bullet-content><p>Flag indicating if transport is active</p></div></div><div class=reference-bullet><div class=reference-bullet-header><a class=locative-type href="https://github.com/40ants/mcp/blob/c50c1c0d32c28fc095570154db59dc66adeada21/src/http-transport.lisp#L42">accessor</a><div class=reference-object><div class=object-name><a href=#x-2840ANTS-MCP-2FHTTP-TRANSPORT-3ATRANSPORT-SERVER-20-2840ANTS-DOC-2FLOCATIVES-3AACCESSOR-2040ANTS-MCP-2FHTTP-TRANSPORT-3AHTTP-TRANSPORT-29-29 id=x-2840ANTS-MCP-2FHTTP-TRANSPORT-3ATRANSPORT-SERVER-20-2840ANTS-DOC-2FLOCATIVES-3AACCESSOR-2040ANTS-MCP-2FHTTP-TRANSPORT-3AHTTP-TRANSPORT-29-29>40ants-mcp/http-transport:transport-server</a></div><div class=object-args><span class=locative-args></span><span class=locative-args>()</span></div></div><a class=bullet-link href=#x-2840ANTS-MCP-2FHTTP-TRANSPORT-3ATRANSPORT-SERVER-20-2840ANTS-DOC-2FLOCATIVES-3AACCESSOR-2040ANTS-MCP-2FHTTP-TRANSPORT-3AHTTP-TRANSPORT-29-29></a></div><div class=bullet-content><p>Clack server instance</p></div></div><h3>40ANTS-MCP/SERVER/DEFINITION<a class=header-link
+     href=#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FSERVER-2FDEFINITION-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29
+     title="Permalink to this headline"
+     id=x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FSERVER-2FDEFINITION-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29></a></h3><div class=reference-bullet><div class=reference-bullet-header><a class=locative-type href="https://github.com/40ants/mcp/blob/c50c1c0d32c28fc095570154db59dc66adeada21/src/server/definition.lisp#L1">package</a><div class=reference-object><div class=object-name><a href=#x-28-23A-28-2828-29-20BASE-CHAR-20-2E-20-2240ANTS-MCP-2FSERVER-2FDEFINITION-22-29-20PACKAGE-29 id=x-28-23A-28-2828-29-20BASE-CHAR-20-2E-20-2240ANTS-MCP-2FSERVER-2FDEFINITION-22-29-20PACKAGE-29>40ants-mcp/server/definition</a></div></div><a class=bullet-link href=#x-28-23A-28-2828-29-20BASE-CHAR-20-2E-20-2240ANTS-MCP-2FSERVER-2FDEFINITION-22-29-20PACKAGE-29></a></div></div><h4>Classes<a class=header-link
+     href=#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FSERVER-2FDEFINITION-3FClasses-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29
+     title="Permalink to this headline"
+     id=x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FSERVER-2FDEFINITION-3FClasses-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29></a></h4><h5>MCP-SERVER<a class=header-link
+     href=#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FSERVER-2FDEFINITION-24MCP-SERVER-3FCLASS-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29
+     title="Permalink to this headline"
+     id=x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FSERVER-2FDEFINITION-24MCP-SERVER-3FCLASS-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29></a></h5><div class=reference-bullet><div class=reference-bullet-header><a class=locative-type href="https://github.com/40ants/mcp/blob/c50c1c0d32c28fc095570154db59dc66adeada21/src/server/definition.lisp#L38">class</a><div class=reference-object><div class=object-name><a href=#x-2840ANTS-MCP-2FSERVER-2FDEFINITION-3AMCP-SERVER-20CLASS-29 id=x-2840ANTS-MCP-2FSERVER-2FDEFINITION-3AMCP-SERVER-20CLASS-29>40ants-mcp/server/definition:mcp-server</a></div><div class=object-args><span class=locative-args></span></div></div><a class=bullet-link href=#x-2840ANTS-MCP-2FSERVER-2FDEFINITION-3AMCP-SERVER-20CLASS-29></a></div></div><p><b>Readers</b></p><div class=reference-bullet><div class=reference-bullet-header><a class=locative-type href="https://github.com/40ants/mcp/blob/c50c1c0d32c28fc095570154db59dc66adeada21/src/server/definition.lisp#L39">reader</a><div class=reference-object><div class=object-name><a href=#x-2840ANTS-MCP-2FSERVER-2FDEFINITION-3ASERVER-TOOLS-COLLECTIONS-20-2840ANTS-DOC-2FLOCATIVES-3AREADER-2040ANTS-MCP-2FSERVER-2FDEFINITION-3AMCP-SERVER-29-29 id=x-2840ANTS-MCP-2FSERVER-2FDEFINITION-3ASERVER-TOOLS-COLLECTIONS-20-2840ANTS-DOC-2FLOCATIVES-3AREADER-2040ANTS-MCP-2FSERVER-2FDEFINITION-3AMCP-SERVER-29-29>40ants-mcp/server/definition:server-tools-collections</a></div><div class=object-args><span class=locative-args></span><span class=locative-args>(collections = nil)</span></div></div><a class=bullet-link href=#x-2840ANTS-MCP-2FSERVER-2FDEFINITION-3ASERVER-TOOLS-COLLECTIONS-20-2840ANTS-DOC-2FLOCATIVES-3AREADER-2040ANTS-MCP-2FSERVER-2FDEFINITION-3AMCP-SERVER-29-29></a></div></div><h4>Functions<a class=header-link
+     href=#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FSERVER-2FDEFINITION-3FFunctions-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29
+     title="Permalink to this headline"
+     id=x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FSERVER-2FDEFINITION-3FFunctions-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29></a></h4><div class=reference-bullet><div class=reference-bullet-header><a class=locative-type href="https://github.com/40ants/mcp/blob/c50c1c0d32c28fc095570154db59dc66adeada21/src/server/definition.lisp#L104">function</a><div class=reference-object><div class=object-name><a href=#x-2840ANTS-MCP-2FSERVER-2FDEFINITION-3ASTART-SERVER-20FUNCTION-29 id=x-2840ANTS-MCP-2FSERVER-2FDEFINITION-3ASTART-SERVER-20FUNCTION-29>40ants-mcp/server/definition:start-server</a></div><div class=object-args><span class=locative-args>tools-collections &amp;key (transport :stdio) (port 8080)</span></div></div><a class=bullet-link href=#x-2840ANTS-MCP-2FSERVER-2FDEFINITION-3ASTART-SERVER-20FUNCTION-29></a></div><div class=bullet-content><p>Start the <code>MCP</code> server with specified transport.
+<code>TRANSPORT</code> can be :stdio or :http.
+<code>PORT</code> is only used when transport is :http.</p></div></div><h3>40ANTS-MCP/SERVER/ERRORS<a class=header-link
+     href=#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FSERVER-2FERRORS-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29
+     title="Permalink to this headline"
+     id=x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FSERVER-2FERRORS-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29></a></h3><div class=reference-bullet><div class=reference-bullet-header><a class=locative-type href="https://github.com/40ants/mcp/blob/c50c1c0d32c28fc095570154db59dc66adeada21/src/server/errors.lisp#L1">package</a><div class=reference-object><div class=object-name><a href=#x-28-23A-28-2824-29-20BASE-CHAR-20-2E-20-2240ANTS-MCP-2FSERVER-2FERRORS-22-29-20PACKAGE-29 id=x-28-23A-28-2824-29-20BASE-CHAR-20-2E-20-2240ANTS-MCP-2FSERVER-2FERRORS-22-29-20PACKAGE-29>40ants-mcp/server/errors</a></div></div><a class=bullet-link href=#x-28-23A-28-2824-29-20BASE-CHAR-20-2E-20-2240ANTS-MCP-2FSERVER-2FERRORS-22-29-20PACKAGE-29></a></div></div><h4>Classes<a class=header-link
+     href=#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FSERVER-2FERRORS-3FClasses-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29
+     title="Permalink to this headline"
+     id=x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FSERVER-2FERRORS-3FClasses-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29></a></h4><h5>TOOL-ERROR<a class=header-link
+     href=#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FSERVER-2FERRORS-24TOOL-ERROR-3FCLASS-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29
+     title="Permalink to this headline"
+     id=x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FSERVER-2FERRORS-24TOOL-ERROR-3FCLASS-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29></a></h5><div class=reference-bullet><div class=reference-bullet-header><a class=locative-type href="https://github.com/40ants/mcp/blob/c50c1c0d32c28fc095570154db59dc66adeada21/src/server/errors.lisp#L10">condition</a><div class=reference-object><div class=object-name><a href=#x-2840ANTS-MCP-2FSERVER-2FERRORS-3ATOOL-ERROR-20CONDITION-29 id=x-2840ANTS-MCP-2FSERVER-2FERRORS-3ATOOL-ERROR-20CONDITION-29>40ants-mcp/server/errors:tool-error</a></div><div class=object-args><span class=locative-args></span></div></div><a class=bullet-link href=#x-2840ANTS-MCP-2FSERVER-2FERRORS-3ATOOL-ERROR-20CONDITION-29></a></div><div class=bullet-content><p>You should signal this error in case if the tool can't accomplish it's job.</p></div></div><p><b>Readers</b></p><div class=reference-bullet><div class=reference-bullet-header><a class=locative-type href="https://github.com/40ants/mcp/blob/c50c1c0d32c28fc095570154db59dc66adeada21/src/server/errors.lisp#L10">reader</a><div class=reference-object><div class=object-name><a href=#x-2840ANTS-MCP-2FSERVER-2FERRORS-3ATOOL-ERROR-CONTENT-20-2840ANTS-DOC-2FLOCATIVES-3AREADER-2040ANTS-MCP-2FSERVER-2FERRORS-3ATOOL-ERROR-29-29 id=x-2840ANTS-MCP-2FSERVER-2FERRORS-3ATOOL-ERROR-CONTENT-20-2840ANTS-DOC-2FLOCATIVES-3AREADER-2040ANTS-MCP-2FSERVER-2FERRORS-3ATOOL-ERROR-29-29>40ants-mcp/server/errors:tool-error-content</a></div><div class=object-args><span class=locative-args></span><span class=locative-args>(:content)</span></div></div><a class=bullet-link href=#x-2840ANTS-MCP-2FSERVER-2FERRORS-3ATOOL-ERROR-CONTENT-20-2840ANTS-DOC-2FLOCATIVES-3AREADER-2040ANTS-MCP-2FSERVER-2FERRORS-3ATOOL-ERROR-29-29></a></div></div><h3>40ANTS-MCP/STDIO-TRANSPORT<a class=header-link
+     href=#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FSTDIO-TRANSPORT-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29
+     title="Permalink to this headline"
+     id=x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FSTDIO-TRANSPORT-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29></a></h3><div class=reference-bullet><div class=reference-bullet-header><a class=locative-type href="https://github.com/40ants/mcp/blob/c50c1c0d32c28fc095570154db59dc66adeada21/src/stdio-transport.lisp#L1">package</a><div class=reference-object><div class=object-name><a href=#x-28-23A-28-2826-29-20BASE-CHAR-20-2E-20-2240ANTS-MCP-2FSTDIO-TRANSPORT-22-29-20PACKAGE-29 id=x-28-23A-28-2826-29-20BASE-CHAR-20-2E-20-2240ANTS-MCP-2FSTDIO-TRANSPORT-22-29-20PACKAGE-29>40ants-mcp/stdio-transport</a></div></div><a class=bullet-link href=#x-28-23A-28-2826-29-20BASE-CHAR-20-2E-20-2240ANTS-MCP-2FSTDIO-TRANSPORT-22-29-20PACKAGE-29></a></div></div><h4>Classes<a class=header-link
+     href=#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FSTDIO-TRANSPORT-3FClasses-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29
+     title="Permalink to this headline"
+     id=x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FSTDIO-TRANSPORT-3FClasses-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29></a></h4><h5>STDIO-TRANSPORT<a class=header-link
+     href=#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FSTDIO-TRANSPORT-24STDIO-TRANSPORT-3FCLASS-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29
+     title="Permalink to this headline"
+     id=x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FSTDIO-TRANSPORT-24STDIO-TRANSPORT-3FCLASS-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29></a></h5><div class=reference-bullet><div class=reference-bullet-header><a class=locative-type href="https://github.com/40ants/mcp/blob/c50c1c0d32c28fc095570154db59dc66adeada21/src/stdio-transport.lisp#L19">class</a><div class=reference-object><div class=object-name><a href=#x-2840ANTS-MCP-2FSTDIO-TRANSPORT-3ASTDIO-TRANSPORT-20CLASS-29 id=x-2840ANTS-MCP-2FSTDIO-TRANSPORT-3ASTDIO-TRANSPORT-20CLASS-29>40ants-mcp/stdio-transport:stdio-transport</a></div><div class=object-args><span class=locative-args></span></div></div><a class=bullet-link href=#x-2840ANTS-MCP-2FSTDIO-TRANSPORT-3ASTDIO-TRANSPORT-20CLASS-29></a></div><div class=bullet-content><p><code>STDIO</code> transport implementation for <code>MCP</code> (Model Context Protocol) communication.
+This class handles <code>JSON-RPC</code> message exchange via standard input/output streams.
+It is designed to work with the <code>MCP</code> protocol specification for <code>AI</code> model communication.</p></div></div><p><b>Readers</b></p><div class=reference-bullet><div class=reference-bullet-header><a class=locative-type href="https://github.com/40ants/mcp/blob/c50c1c0d32c28fc095570154db59dc66adeada21/src/stdio-transport.lisp#L20">reader</a><div class=reference-object><div class=object-name><a href=#x-2840ANTS-MCP-2FSTDIO-TRANSPORT-3ATRANSPORT-INPUT-20-2840ANTS-DOC-2FLOCATIVES-3AREADER-2040ANTS-MCP-2FSTDIO-TRANSPORT-3ASTDIO-TRANSPORT-29-29 id=x-2840ANTS-MCP-2FSTDIO-TRANSPORT-3ATRANSPORT-INPUT-20-2840ANTS-DOC-2FLOCATIVES-3AREADER-2040ANTS-MCP-2FSTDIO-TRANSPORT-3ASTDIO-TRANSPORT-29-29>40ants-mcp/stdio-transport:transport-input</a></div><div class=object-args><span class=locative-args></span><span class=locative-args>(:input-stream = \*standard-input\*)</span></div></div><a class=bullet-link href=#x-2840ANTS-MCP-2FSTDIO-TRANSPORT-3ATRANSPORT-INPUT-20-2840ANTS-DOC-2FLOCATIVES-3AREADER-2040ANTS-MCP-2FSTDIO-TRANSPORT-3ASTDIO-TRANSPORT-29-29></a></div><div class=bullet-content><p>Input stream for reading <code>JSON-RPC</code> messages. Defaults to <i>standard-input</i>.</p></div></div><div class=reference-bullet><div class=reference-bullet-header><a class=locative-type href="https://github.com/40ants/mcp/blob/c50c1c0d32c28fc095570154db59dc66adeada21/src/stdio-transport.lisp#L24">reader</a><div class=reference-object><div class=object-name><a href=#x-2840ANTS-MCP-2FSTDIO-TRANSPORT-3ATRANSPORT-OUTPUT-20-2840ANTS-DOC-2FLOCATIVES-3AREADER-2040ANTS-MCP-2FSTDIO-TRANSPORT-3ASTDIO-TRANSPORT-29-29 id=x-2840ANTS-MCP-2FSTDIO-TRANSPORT-3ATRANSPORT-OUTPUT-20-2840ANTS-DOC-2FLOCATIVES-3AREADER-2040ANTS-MCP-2FSTDIO-TRANSPORT-3ASTDIO-TRANSPORT-29-29>40ants-mcp/stdio-transport:transport-output</a></div><div class=object-args><span class=locative-args></span><span class=locative-args>(:output-stream = \*standard-output\*)</span></div></div><a class=bullet-link href=#x-2840ANTS-MCP-2FSTDIO-TRANSPORT-3ATRANSPORT-OUTPUT-20-2840ANTS-DOC-2FLOCATIVES-3AREADER-2040ANTS-MCP-2FSTDIO-TRANSPORT-3ASTDIO-TRANSPORT-29-29></a></div><div class=bullet-content><p>Output stream for writing <code>JSON-RPC</code> responses. Defaults to <i>standard-output</i>.</p></div></div><div class=reference-bullet><div class=reference-bullet-header><a class=locative-type href="https://github.com/40ants/mcp/blob/c50c1c0d32c28fc095570154db59dc66adeada21/src/stdio-transport.lisp#L28">reader</a><div class=reference-object><div class=object-name><a href=#x-2840ANTS-MCP-2FSTDIO-TRANSPORT-3ATRANSPORT-RUNNING-P-20-2840ANTS-DOC-2FLOCATIVES-3AREADER-2040ANTS-MCP-2FSTDIO-TRANSPORT-3ASTDIO-TRANSPORT-29-29 id=x-2840ANTS-MCP-2FSTDIO-TRANSPORT-3ATRANSPORT-RUNNING-P-20-2840ANTS-DOC-2FLOCATIVES-3AREADER-2040ANTS-MCP-2FSTDIO-TRANSPORT-3ASTDIO-TRANSPORT-29-29>40ants-mcp/stdio-transport:transport-running-p</a></div><div class=object-args><span class=locative-args></span><span class=locative-args>(= t)</span></div></div><a class=bullet-link href=#x-2840ANTS-MCP-2FSTDIO-TRANSPORT-3ATRANSPORT-RUNNING-P-20-2840ANTS-DOC-2FLOCATIVES-3AREADER-2040ANTS-MCP-2FSTDIO-TRANSPORT-3ASTDIO-TRANSPORT-29-29></a></div><div class=bullet-content><p>Flag indicating if transport is active and processing messages.</p></div></div><p><b>Accessors</b></p><div class=reference-bullet><div class=reference-bullet-header><a class=locative-type href="https://github.com/40ants/mcp/blob/c50c1c0d32c28fc095570154db59dc66adeada21/src/stdio-transport.lisp#L20">accessor</a><div class=reference-object><div class=object-name><a href=#x-2840ANTS-MCP-2FSTDIO-TRANSPORT-3ATRANSPORT-INPUT-20-2840ANTS-DOC-2FLOCATIVES-3AACCESSOR-2040ANTS-MCP-2FSTDIO-TRANSPORT-3ASTDIO-TRANSPORT-29-29 id=x-2840ANTS-MCP-2FSTDIO-TRANSPORT-3ATRANSPORT-INPUT-20-2840ANTS-DOC-2FLOCATIVES-3AACCESSOR-2040ANTS-MCP-2FSTDIO-TRANSPORT-3ASTDIO-TRANSPORT-29-29>40ants-mcp/stdio-transport:transport-input</a></div><div class=object-args><span class=locative-args></span><span class=locative-args>(:input-stream = \*standard-input\*)</span></div></div><a class=bullet-link href=#x-2840ANTS-MCP-2FSTDIO-TRANSPORT-3ATRANSPORT-INPUT-20-2840ANTS-DOC-2FLOCATIVES-3AACCESSOR-2040ANTS-MCP-2FSTDIO-TRANSPORT-3ASTDIO-TRANSPORT-29-29></a></div><div class=bullet-content><p>Input stream for reading <code>JSON-RPC</code> messages. Defaults to <i>standard-input</i>.</p></div></div><div class=reference-bullet><div class=reference-bullet-header><a class=locative-type href="https://github.com/40ants/mcp/blob/c50c1c0d32c28fc095570154db59dc66adeada21/src/stdio-transport.lisp#L24">accessor</a><div class=reference-object><div class=object-name><a href=#x-2840ANTS-MCP-2FSTDIO-TRANSPORT-3ATRANSPORT-OUTPUT-20-2840ANTS-DOC-2FLOCATIVES-3AACCESSOR-2040ANTS-MCP-2FSTDIO-TRANSPORT-3ASTDIO-TRANSPORT-29-29 id=x-2840ANTS-MCP-2FSTDIO-TRANSPORT-3ATRANSPORT-OUTPUT-20-2840ANTS-DOC-2FLOCATIVES-3AACCESSOR-2040ANTS-MCP-2FSTDIO-TRANSPORT-3ASTDIO-TRANSPORT-29-29>40ants-mcp/stdio-transport:transport-output</a></div><div class=object-args><span class=locative-args></span><span class=locative-args>(:output-stream = \*standard-output\*)</span></div></div><a class=bullet-link href=#x-2840ANTS-MCP-2FSTDIO-TRANSPORT-3ATRANSPORT-OUTPUT-20-2840ANTS-DOC-2FLOCATIVES-3AACCESSOR-2040ANTS-MCP-2FSTDIO-TRANSPORT-3ASTDIO-TRANSPORT-29-29></a></div><div class=bullet-content><p>Output stream for writing <code>JSON-RPC</code> responses. Defaults to <i>standard-output</i>.</p></div></div><div class=reference-bullet><div class=reference-bullet-header><a class=locative-type href="https://github.com/40ants/mcp/blob/c50c1c0d32c28fc095570154db59dc66adeada21/src/stdio-transport.lisp#L28">accessor</a><div class=reference-object><div class=object-name><a href=#x-2840ANTS-MCP-2FSTDIO-TRANSPORT-3ATRANSPORT-RUNNING-P-20-2840ANTS-DOC-2FLOCATIVES-3AACCESSOR-2040ANTS-MCP-2FSTDIO-TRANSPORT-3ASTDIO-TRANSPORT-29-29 id=x-2840ANTS-MCP-2FSTDIO-TRANSPORT-3ATRANSPORT-RUNNING-P-20-2840ANTS-DOC-2FLOCATIVES-3AACCESSOR-2040ANTS-MCP-2FSTDIO-TRANSPORT-3ASTDIO-TRANSPORT-29-29>40ants-mcp/stdio-transport:transport-running-p</a></div><div class=object-args><span class=locative-args></span><span class=locative-args>(= t)</span></div></div><a class=bullet-link href=#x-2840ANTS-MCP-2FSTDIO-TRANSPORT-3ATRANSPORT-RUNNING-P-20-2840ANTS-DOC-2FLOCATIVES-3AACCESSOR-2040ANTS-MCP-2FSTDIO-TRANSPORT-3ASTDIO-TRANSPORT-29-29></a></div><div class=bullet-content><p>Flag indicating if transport is active and processing messages.</p></div></div><h4>Generics<a class=header-link
+     href=#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FSTDIO-TRANSPORT-3FGenerics-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29
+     title="Permalink to this headline"
+     id=x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FSTDIO-TRANSPORT-3FGenerics-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29></a></h4><div class=reference-bullet><div class=reference-bullet-header><a class=locative-type href="https://github.com/40ants/mcp/blob/c50c1c0d32c28fc095570154db59dc66adeada21/src/transport/base.lisp#L18">generic-function</a><div class=reference-object><div class=object-name><a href=#x-2840ANTS-MCP-2FTRANSPORT-2FBASE-3ARECEIVE-MESSAGE-20GENERIC-FUNCTION-29 id=x-2840ANTS-MCP-2FTRANSPORT-2FBASE-3ARECEIVE-MESSAGE-20GENERIC-FUNCTION-29>40ants-mcp/transport/base:receive-message</a></div><div class=object-args><span class=locative-args>transport</span></div></div><a class=bullet-link href=#x-2840ANTS-MCP-2FTRANSPORT-2FBASE-3ARECEIVE-MESSAGE-20GENERIC-FUNCTION-29></a></div><div class=bullet-content><p>Receive a <code>JSON-RPC</code> message, returns a message or <code>NIL</code>.</p></div></div><div class=reference-bullet><div class=reference-bullet-header><a class=locative-type href="https://github.com/40ants/mcp/blob/c50c1c0d32c28fc095570154db59dc66adeada21/src/transport/base.lisp#L22">generic-function</a><div class=reference-object><div class=object-name><a href=#x-2840ANTS-MCP-2FTRANSPORT-2FBASE-3ASEND-MESSAGE-20GENERIC-FUNCTION-29 id=x-2840ANTS-MCP-2FTRANSPORT-2FBASE-3ASEND-MESSAGE-20GENERIC-FUNCTION-29>40ants-mcp/transport/base:send-message</a></div><div class=object-args><span class=locative-args>transport message</span></div></div><a class=bullet-link href=#x-2840ANTS-MCP-2FTRANSPORT-2FBASE-3ASEND-MESSAGE-20GENERIC-FUNCTION-29></a></div><div class=bullet-content><p>Send a <code>JSON-RPC</code> message, returns no values.</p></div></div><h3>40ANTS-MCP/TOOLS<a class=header-link
+     href=#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FTOOLS-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29
+     title="Permalink to this headline"
+     id=x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FTOOLS-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29></a></h3><div class=reference-bullet><div class=reference-bullet-header><a class=locative-type href="https://github.com/40ants/mcp/blob/c50c1c0d32c28fc095570154db59dc66adeada21/src/tools.lisp#L1">package</a><div class=reference-object><div class=object-name><a href=#x-28-23A-28-2816-29-20BASE-CHAR-20-2E-20-2240ANTS-MCP-2FTOOLS-22-29-20PACKAGE-29 id=x-28-23A-28-2816-29-20BASE-CHAR-20-2E-20-2240ANTS-MCP-2FTOOLS-22-29-20PACKAGE-29>40ants-mcp/tools</a></div></div><a class=bullet-link href=#x-28-23A-28-2816-29-20BASE-CHAR-20-2E-20-2240ANTS-MCP-2FTOOLS-22-29-20PACKAGE-29></a></div></div><h4>Macros<a class=header-link
+     href=#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FTOOLS-3FMacros-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29
+     title="Permalink to this headline"
+     id=x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FTOOLS-3FMacros-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29></a></h4><div class=reference-bullet><div class=reference-bullet-header><a class=locative-type href="https://github.com/40ants/mcp/blob/c50c1c0d32c28fc095570154db59dc66adeada21/src/tools.lisp#L10">macro</a><div class=reference-object><div class=object-name><a href=#x-2840ANTS-MCP-2FTOOLS-3ADEFINE-TOOL-20-2840ANTS-DOC-2FLOCATIVES-3AMACRO-29-29 id=x-2840ANTS-MCP-2FTOOLS-3ADEFINE-TOOL-20-2840ANTS-DOC-2FLOCATIVES-3AMACRO-29-29>40ants-mcp/tools:define-tool</a></div><div class=object-args><span class=locative-args>name args &amp;body body</span></div></div><a class=bullet-link href=#x-2840ANTS-MCP-2FTOOLS-3ADEFINE-TOOL-20-2840ANTS-DOC-2FLOCATIVES-3AMACRO-29-29></a></div></div><h3>40ANTS-MCP/TRANSPORT/BASE<a class=header-link
+     href=#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FTRANSPORT-2FBASE-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29
+     title="Permalink to this headline"
+     id=x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FTRANSPORT-2FBASE-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29></a></h3><div class=reference-bullet><div class=reference-bullet-header><a class=locative-type href="https://github.com/40ants/mcp/blob/c50c1c0d32c28fc095570154db59dc66adeada21/src/transport/base.lisp#L1">package</a><div class=reference-object><div class=object-name><a href=#x-28-23A-28-2825-29-20BASE-CHAR-20-2E-20-2240ANTS-MCP-2FTRANSPORT-2FBASE-22-29-20PACKAGE-29 id=x-28-23A-28-2825-29-20BASE-CHAR-20-2E-20-2240ANTS-MCP-2FTRANSPORT-2FBASE-22-29-20PACKAGE-29>40ants-mcp/transport/base</a></div></div><a class=bullet-link href=#x-28-23A-28-2825-29-20BASE-CHAR-20-2E-20-2240ANTS-MCP-2FTRANSPORT-2FBASE-22-29-20PACKAGE-29></a></div></div><h4>Generics<a class=header-link
+     href=#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FTRANSPORT-2FBASE-3FGenerics-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29
+     title="Permalink to this headline"
+     id=x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FTRANSPORT-2FBASE-3FGenerics-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29></a></h4><div class=reference-bullet><div class=reference-bullet-header><a class=locative-type href="https://github.com/40ants/mcp/blob/c50c1c0d32c28fc095570154db59dc66adeada21/src/transport/base.lisp#L18">generic-function</a><div class=reference-object><div class=object-name><a href=#x-2840ANTS-MCP-2FTRANSPORT-2FBASE-3ARECEIVE-MESSAGE-20GENERIC-FUNCTION-29 id=x-2840ANTS-MCP-2FTRANSPORT-2FBASE-3ARECEIVE-MESSAGE-20GENERIC-FUNCTION-29>40ants-mcp/transport/base:receive-message</a></div><div class=object-args><span class=locative-args>transport</span></div></div><a class=bullet-link href=#x-2840ANTS-MCP-2FTRANSPORT-2FBASE-3ARECEIVE-MESSAGE-20GENERIC-FUNCTION-29></a></div><div class=bullet-content><p>Receive a <code>JSON-RPC</code> message, returns a message or <code>NIL</code>.</p></div></div><div class=reference-bullet><div class=reference-bullet-header><a class=locative-type href="https://github.com/40ants/mcp/blob/c50c1c0d32c28fc095570154db59dc66adeada21/src/transport/base.lisp#L22">generic-function</a><div class=reference-object><div class=object-name><a href=#x-2840ANTS-MCP-2FTRANSPORT-2FBASE-3ASEND-MESSAGE-20GENERIC-FUNCTION-29 id=x-2840ANTS-MCP-2FTRANSPORT-2FBASE-3ASEND-MESSAGE-20GENERIC-FUNCTION-29>40ants-mcp/transport/base:send-message</a></div><div class=object-args><span class=locative-args>transport message</span></div></div><a class=bullet-link href=#x-2840ANTS-MCP-2FTRANSPORT-2FBASE-3ASEND-MESSAGE-20GENERIC-FUNCTION-29></a></div><div class=bullet-content><p>Send a <code>JSON-RPC</code> message, returns no values.</p></div></div><div class=reference-bullet><div class=reference-bullet-header><a class=locative-type href="https://github.com/40ants/mcp/blob/c50c1c0d32c28fc095570154db59dc66adeada21/src/transport/base.lisp#L10">generic-function</a><div class=reference-object><div class=object-name><a href=#x-2840ANTS-MCP-2FTRANSPORT-2FBASE-3ASTART-LOOP-20GENERIC-FUNCTION-29 id=x-2840ANTS-MCP-2FTRANSPORT-2FBASE-3ASTART-LOOP-20GENERIC-FUNCTION-29>40ants-mcp/transport/base:start-loop</a></div><div class=object-args><span class=locative-args>transport message-handler</span></div></div><a class=bullet-link href=#x-2840ANTS-MCP-2FTRANSPORT-2FBASE-3ASTART-LOOP-20GENERIC-FUNCTION-29></a></div><div class=bullet-content><p>Starts message processing using given transport.</p></div></div><div class=reference-bullet><div class=reference-bullet-header><a class=locative-type href="https://github.com/40ants/mcp/blob/c50c1c0d32c28fc095570154db59dc66adeada21/src/transport/base.lisp#L14">generic-function</a><div class=reference-object><div class=object-name><a href=#x-2840ANTS-MCP-2FTRANSPORT-2FBASE-3ASTOP-LOOP-20GENERIC-FUNCTION-29 id=x-2840ANTS-MCP-2FTRANSPORT-2FBASE-3ASTOP-LOOP-20GENERIC-FUNCTION-29>40ants-mcp/transport/base:stop-loop</a></div><div class=object-args><span class=locative-args>transport</span></div></div><a class=bullet-link href=#x-2840ANTS-MCP-2FTRANSPORT-2FBASE-3ASTOP-LOOP-20GENERIC-FUNCTION-29></a></div><div class=bullet-content><p>Stops message processing using given transport.</p></div></div>
+   </div><div class=footer>
+    <hr class=separator>
+    <p class=fineprint>Created with passion by <em>40Ants</em><a class=lisp-logo
+     href="http://lisp-lang.org/">
+      <img
+           src="https://40ants.com/img/made-with-lisp.svg"></a>
+   </div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Ключ для localStorage
+  const STORAGE_KEY = '40ants-mcp-docs-menu-state';
+  
+  // Загружаем сохраненное состояние меню
+  function loadMenuState() {
+    try {
+      const savedState = localStorage.getItem(STORAGE_KEY);
+      return savedState ? JSON.parse(savedState) : {};
+    } catch (e) {
+      console.error('Ошибка при загрузке состояния меню:', e);
+      return {};
+    }
+  }
+  
+  // Сохраняем текущее состояние меню
+  function saveMenuState(state) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (e) {
+      console.error('Ошибка при сохранении состояния меню:', e);
+    }
+  }
+  
+  // Получаем уникальный идентификатор для пункта меню
+  function getMenuItemId(item) {
+    const link = item.querySelector('a');
+    if (!link) return null;
+    
+    // Используем текст ссылки как идентификатор
+    // Можно также использовать href, но он может меняться в зависимости от текущей страницы
+    return link.innerText.trim();
+  }
+  
+  // Загружаем сохраненное состояние
+  const menuState = loadMenuState();
+  
+  // Находим все пункты меню с подпунктами
+  const menuItems = document.querySelectorAll('.sidebar li');
+  
+  // Обрабатываем каждый пункт меню
+  menuItems.forEach(item => {
+    const subMenu = item.querySelector('ul');
+    
+    // Если у пункта есть подменю
+    if (subMenu) {
+      const itemId = getMenuItemId(item);
+      item.classList.add('has-children');
+      
+      // Восстанавливаем состояние из localStorage, если оно сохранено
+      if (itemId && menuState[itemId]) {
+        item.classList.add('expanded');
+      }
+      
+      // Добавляем обработчик клика
+      const link = item.querySelector('a');
+      if (link) {
+        link.addEventListener('click', function(e) {
+          // Останавливаем переход по ссылке только если кликнули по пункту с подменю
+          if (item.classList.contains('has-children')) {
+            e.preventDefault();
+            
+            // Переключаем класс для раскрытия/скрытия
+            item.classList.toggle('expanded');
+            
+            // Сохраняем новое состояние
+            if (itemId) {
+              if (item.classList.contains('expanded')) {
+                menuState[itemId] = true;
+              } else {
+                delete menuState[itemId];
+              }
+              saveMenuState(menuState);
+            }
+          }
+        });
+      }
+    }
+  });
+  
+  // Функция для поиска и раскрытия родителей активного пункта
+  function expandActiveItemParents() {
+    const activeItem = document.querySelector('.sidebar li.active');
+    if (activeItem) {
+      let parent = activeItem.parentElement;
+      
+      while (parent) {
+        if (parent.tagName === 'UL' && parent.parentElement && parent.parentElement.tagName === 'LI') {
+          parent.parentElement.classList.add('expanded');
+          parent.parentElement.classList.add('active-parent');
+          
+          // Сохраняем состояние активного родителя
+          const parentItem = parent.parentElement;
+          const parentId = getMenuItemId(parentItem);
+          if (parentId) {
+            menuState[parentId] = true;
+          }
+        }
+        parent = parent.parentElement;
+      }
+      
+      // Сохраняем обновленное состояние после раскрытия активных родителей
+      saveMenuState(menuState);
+    }
+  }
+  
+  // Запускаем функцию для текущей страницы
+  expandActiveItemParents();
+});
+</script>
+
+
+  </div>
+ </body>
+</html>

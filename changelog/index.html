@@ -1,0 +1,257 @@
+<html lang=en>
+ <head>
+  <meta charset=UTF-8><meta name=viewport
+      content="width=device-width, initial-scale=1">
+  <title>ChangeLog</title>
+  <link rel=alternate
+        href="https://40ants.com/mcp/changelog.xml"
+        type="application/rss+xml">
+  <link rel=stylesheet type="text/css"
+        href="../theme.css">
+  <script type="text/javascript" src="../jquery.js"></script>
+  <script type="text/javascript" src="../toc.js"></script>
+  <script type="text/javascript">$(document).ready(function() {$('a:has(img)').css('border-bottom', 'none')})</script>
+  <link rel=stylesheet type="text/css"
+      href="../highlight.min.css">
+  <script type="text/javascript"
+          src="../highlight.min.js"></script>
+  <script type="text/javascript">hljs.highlightAll();</script>
+<style type="text/css">
+/* Стили для сворачиваемого меню */
+.sidebar ul ul {
+  display: none; /* Скрываем все подменю по умолчанию */
+  margin-left: 0.5em;
+}
+
+.sidebar li.expanded > ul {
+  display: block; /* Показываем подменю для развернутых элементов */
+}
+
+/* Стили для пунктов с подменю */
+.sidebar li.has-children > a {
+  cursor: pointer;
+  position: relative;
+  padding-left: 1.2em;
+}
+
+.sidebar li.has-children > p > a {
+  position: relative;
+  left: -1rem;
+}
+
+.sidebar li.has-children > p > a::before {
+  content:"►";
+}
+
+.sidebar li.has-children.expanded > p > a::before {
+  content: "▼";
+  position: relative;
+  left: -0.08rem;
+}
+
+/* Подсветка активного пункта */
+.sidebar li.active > a {
+  font-weight: bold;
+}
+
+/* Если активная страница находится в подменю, раскрываем родителя */
+.sidebar li.active-parent {
+  font-weight: normal;
+}
+
+.sidebar li.active-parent > ul {
+  display: block;
+}
+</style>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FL71WXK73K"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-FL71WXK73K');
+    </script>
+
+    <!-- Yandex.Metrika counter -->
+    <script type="text/javascript" >
+       (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+       m[i].l=1*new Date();
+       for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+       k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+       (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+
+       ym(42462884, "init", {
+            clickmap:true,
+            trackLinks:true,
+            accurateTrackBounce:true
+       });
+    </script>
+    <noscript><div><img src="https://mc.yandex.ru/watch/42462884" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+    <!-- /Yandex.Metrika counter -->
+
+ </head>
+ <body>
+  <div class=page><a id=fork-me href="https://github.com/40ants/mcp">Fork me on GitHub</a>
+   <div class=navbar>
+    <div class=navbar-inner>
+     <a class=brand href="/">
+      <img class=logo
+           src="https://40ants.com/img/logo.svg"></a>
+     <ul class=nav>
+      <li><a href="/posts/">Blog</a>
+      <li><a href="/ru/posts/">Blog (RU)</a>
+      <li><a href="/tips/">Lisp Tips</a>
+      <li><a href="/projects/">Our Projects</a>
+      <li><a href="/about/">About</a>
+     </ul>
+    </div>
+   </div>
+   <input type=checkbox id=sidebar-check>
+   <label for=sidebar-check>
+    <div id=sidebar-trigger>
+     <span></span><span></span><span></span>
+    </div></label><div class=sidebar><div class=header><form class=search method=GET
+      action="../search/">
+      <input type=text name=q>
+      <input type=submit value=Search><span id=search-progress></span>
+     </form>
+    </div><div class=content><div class=page-toc><ul><li><p><a href="../#x-2840ANTS-MCP-DOCS-2FINDEX-3A-40INDEX-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="../" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-40INDEX-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">40ants-mcp - The framework for building MCP servers and clients in Common Lisp.</a></p><ul><li><p><a href="../#40-ants-mcp-asdf-system-details" data-document="../" data-node="40-ants-mcp-asdf-system-details">40ANTS-MCP ASDF System Details</a></p></li><li><p><a href="../#x-2840ANTS-MCP-DOCS-2FINDEX-3A-40ABOUT-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="../" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-40ABOUT-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">About</a></p><ul><li><p><a href="../#features" data-document="../" data-node="features">Features</a></p></li><li><p><a href="../#roadmap" data-document="../" data-node="roadmap">Roadmap</a></p></li></ul></li><li><p><a href="../#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-40INSTALLATION-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="../" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-40INSTALLATION-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">Installation</a></p></li><li><p><a href="../#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-40USAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="../" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-40USAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">Usage</a></p><ul><li><p><a href="../#running-as-a-script" data-document="../" data-node="running-as-a-script">Running as a Script</a></p></li></ul></li><li><p><a href="../#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-40API-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="../" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-40API-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">API</a></p><ul><li><p><a href="../#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FCONTENT-2FBASE-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="../" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FCONTENT-2FBASE-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">40ANTS-MCP/CONTENT/BASE</a></p><ul><li><p><a href="../#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FCONTENT-2FBASE-3FClasses-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="../" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FCONTENT-2FBASE-3FClasses-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">Classes</a></p><ul><li><p><a href="../#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FCONTENT-2FBASE-24CONTENT-3FCLASS-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="../" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FCONTENT-2FBASE-24CONTENT-3FCLASS-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">CONTENT</a></p></li></ul></li></ul></li><li><p><a href="../#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FCONTENT-2FTEXT-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="../" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FCONTENT-2FTEXT-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">40ANTS-MCP/CONTENT/TEXT</a></p><ul><li><p><a href="../#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FCONTENT-2FTEXT-3FClasses-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="../" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FCONTENT-2FTEXT-3FClasses-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">Classes</a></p><ul><li><p><a href="../#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FCONTENT-2FTEXT-24TEXT-CONTENT-3FCLASS-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="../" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FCONTENT-2FTEXT-24TEXT-CONTENT-3FCLASS-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">TEXT-CONTENT</a></p></li></ul></li></ul></li><li><p><a href="../#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FHTTP-TRANSPORT-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="../" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FHTTP-TRANSPORT-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">40ANTS-MCP/HTTP-TRANSPORT</a></p><ul><li><p><a href="../#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FHTTP-TRANSPORT-3FClasses-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="../" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FHTTP-TRANSPORT-3FClasses-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">Classes</a></p><ul><li><p><a href="../#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FHTTP-TRANSPORT-24HTTP-TRANSPORT-3FCLASS-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="../" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FHTTP-TRANSPORT-24HTTP-TRANSPORT-3FCLASS-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">HTTP-TRANSPORT</a></p></li></ul></li></ul></li><li><p><a href="../#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FSERVER-2FDEFINITION-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="../" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FSERVER-2FDEFINITION-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">40ANTS-MCP/SERVER/DEFINITION</a></p><ul><li><p><a href="../#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FSERVER-2FDEFINITION-3FClasses-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="../" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FSERVER-2FDEFINITION-3FClasses-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">Classes</a></p><ul><li><p><a href="../#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FSERVER-2FDEFINITION-24MCP-SERVER-3FCLASS-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="../" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FSERVER-2FDEFINITION-24MCP-SERVER-3FCLASS-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">MCP-SERVER</a></p></li></ul></li><li><p><a href="../#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FSERVER-2FDEFINITION-3FFunctions-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="../" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FSERVER-2FDEFINITION-3FFunctions-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">Functions</a></p></li></ul></li><li><p><a href="../#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FSERVER-2FERRORS-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="../" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FSERVER-2FERRORS-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">40ANTS-MCP/SERVER/ERRORS</a></p><ul><li><p><a href="../#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FSERVER-2FERRORS-3FClasses-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="../" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FSERVER-2FERRORS-3FClasses-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">Classes</a></p><ul><li><p><a href="../#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FSERVER-2FERRORS-24TOOL-ERROR-3FCLASS-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="../" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FSERVER-2FERRORS-24TOOL-ERROR-3FCLASS-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">TOOL-ERROR</a></p></li></ul></li></ul></li><li><p><a href="../#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FSTDIO-TRANSPORT-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="../" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FSTDIO-TRANSPORT-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">40ANTS-MCP/STDIO-TRANSPORT</a></p><ul><li><p><a href="../#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FSTDIO-TRANSPORT-3FClasses-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="../" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FSTDIO-TRANSPORT-3FClasses-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">Classes</a></p><ul><li><p><a href="../#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FSTDIO-TRANSPORT-24STDIO-TRANSPORT-3FCLASS-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="../" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FSTDIO-TRANSPORT-24STDIO-TRANSPORT-3FCLASS-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">STDIO-TRANSPORT</a></p></li></ul></li><li><p><a href="../#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FSTDIO-TRANSPORT-3FGenerics-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="../" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FSTDIO-TRANSPORT-3FGenerics-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">Generics</a></p></li></ul></li><li><p><a href="../#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FTOOLS-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="../" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FTOOLS-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">40ANTS-MCP/TOOLS</a></p><ul><li><p><a href="../#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FTOOLS-3FMacros-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="../" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FTOOLS-3FMacros-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">Macros</a></p></li></ul></li><li><p><a href="../#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FTRANSPORT-2FBASE-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="../" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-4040ANTS-MCP-2FTRANSPORT-2FBASE-3FPACKAGE-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">40ANTS-MCP/TRANSPORT/BASE</a></p><ul><li><p><a href="../#x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FTRANSPORT-2FBASE-3FGenerics-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="../" data-node="x-2840ANTS-MCP-DOCS-2FINDEX-3A-3A-7C-4040ANTS-MCP-2FTRANSPORT-2FBASE-3FGenerics-SECTION-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">Generics</a></p></li></ul></li></ul></li></ul></li><li><p><a href="#x-2840ANTS-MCP-DOCS-2FCHANGELOG-3A-40CHANGELOG-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29" data-document="" data-node="x-2840ANTS-MCP-DOCS-2FCHANGELOG-3A-40CHANGELOG-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29">ChangeLog</a></p></li></ul>
+     </div>
+    </div><div class=footer>
+     <a href="https://40ants.com/doc">[generated by 40ANTS-DOC]</a>
+    </div>
+   </div><div class=content role=main><h1>ChangeLog<a class=rss-icon href="https://40ants.com/mcp/changelog.xml"></a></h1><h2>0.3.0 (2026-01-25)<a class=header-link
+     href=#x-2840ANTS-MCP-DOCS-2FCHANGELOG-3A-3A-7C0-2E3-2E0-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29
+     title="Permalink to this headline"
+     id=x-2840ANTS-MCP-DOCS-2FCHANGELOG-3A-3A-7C0-2E3-2E0-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29></a></h2><ul><li><p>Hide log messages by default, most of them now are written with debug level.</p></li></ul><h2>0.2.0 (2025-06-29)<a class=header-link
+     href=#x-2840ANTS-MCP-DOCS-2FCHANGELOG-3A-3A-7C0-2E2-2E0-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29
+     title="Permalink to this headline"
+     id=x-2840ANTS-MCP-DOCS-2FCHANGELOG-3A-3A-7C0-2E2-2E0-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29></a></h2><ul><li><p>Implemented streamable<code>HTTP</code> protocol and notifications on changed tools.</p></li></ul><h2>0.1.0 (2025-06-22)<a class=header-link
+     href=#x-2840ANTS-MCP-DOCS-2FCHANGELOG-3A-3A-7C0-2E1-2E0-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29
+     title="Permalink to this headline"
+     id=x-2840ANTS-MCP-DOCS-2FCHANGELOG-3A-3A-7C0-2E1-2E0-7C-2040ANTS-DOC-2FLOCATIVES-3ASECTION-29></a></h2><ul><li><p>Initial version supporting <code>STDIO</code> and Tools.</p></li></ul>
+   </div><div class=footer>
+    <hr class=separator>
+    <p class=fineprint>Created with passion by <em>40Ants</em><a class=lisp-logo
+     href="http://lisp-lang.org/">
+      <img
+           src="https://40ants.com/img/made-with-lisp.svg"></a>
+   </div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Ключ для localStorage
+  const STORAGE_KEY = '40ants-mcp-docs-menu-state';
+  
+  // Загружаем сохраненное состояние меню
+  function loadMenuState() {
+    try {
+      const savedState = localStorage.getItem(STORAGE_KEY);
+      return savedState ? JSON.parse(savedState) : {};
+    } catch (e) {
+      console.error('Ошибка при загрузке состояния меню:', e);
+      return {};
+    }
+  }
+  
+  // Сохраняем текущее состояние меню
+  function saveMenuState(state) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (e) {
+      console.error('Ошибка при сохранении состояния меню:', e);
+    }
+  }
+  
+  // Получаем уникальный идентификатор для пункта меню
+  function getMenuItemId(item) {
+    const link = item.querySelector('a');
+    if (!link) return null;
+    
+    // Используем текст ссылки как идентификатор
+    // Можно также использовать href, но он может меняться в зависимости от текущей страницы
+    return link.innerText.trim();
+  }
+  
+  // Загружаем сохраненное состояние
+  const menuState = loadMenuState();
+  
+  // Находим все пункты меню с подпунктами
+  const menuItems = document.querySelectorAll('.sidebar li');
+  
+  // Обрабатываем каждый пункт меню
+  menuItems.forEach(item => {
+    const subMenu = item.querySelector('ul');
+    
+    // Если у пункта есть подменю
+    if (subMenu) {
+      const itemId = getMenuItemId(item);
+      item.classList.add('has-children');
+      
+      // Восстанавливаем состояние из localStorage, если оно сохранено
+      if (itemId && menuState[itemId]) {
+        item.classList.add('expanded');
+      }
+      
+      // Добавляем обработчик клика
+      const link = item.querySelector('a');
+      if (link) {
+        link.addEventListener('click', function(e) {
+          // Останавливаем переход по ссылке только если кликнули по пункту с подменю
+          if (item.classList.contains('has-children')) {
+            e.preventDefault();
+            
+            // Переключаем класс для раскрытия/скрытия
+            item.classList.toggle('expanded');
+            
+            // Сохраняем новое состояние
+            if (itemId) {
+              if (item.classList.contains('expanded')) {
+                menuState[itemId] = true;
+              } else {
+                delete menuState[itemId];
+              }
+              saveMenuState(menuState);
+            }
+          }
+        });
+      }
+    }
+  });
+  
+  // Функция для поиска и раскрытия родителей активного пункта
+  function expandActiveItemParents() {
+    const activeItem = document.querySelector('.sidebar li.active');
+    if (activeItem) {
+      let parent = activeItem.parentElement;
+      
+      while (parent) {
+        if (parent.tagName === 'UL' && parent.parentElement && parent.parentElement.tagName === 'LI') {
+          parent.parentElement.classList.add('expanded');
+          parent.parentElement.classList.add('active-parent');
+          
+          // Сохраняем состояние активного родителя
+          const parentItem = parent.parentElement;
+          const parentId = getMenuItemId(parentItem);
+          if (parentId) {
+            menuState[parentId] = true;
+          }
+        }
+        parent = parent.parentElement;
+      }
+      
+      // Сохраняем обновленное состояние после раскрытия активных родителей
+      saveMenuState(menuState);
+    }
+  }
+  
+  // Запускаем функцию для текущей страницы
+  expandActiveItemParents();
+});
+</script>
+
+
+  </div>
+ </body>
+</html>
