@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<rss version="2.0">
+    <channel>
+        <title>40ants-mcp-docs ChangeLog</title>
+        <link>https://40ants.com/mcp/</link>
+        <generator>xml-emitter</generator>
+        <language>en-us</language>
+        <item>
+            <title>0.3.0  (2026-01-25)</title>
+            <description>&lt;ul&gt;&lt;li&gt;&lt;p&gt;Hide log messages by default, most of them now are written with debug level.&lt;/p&gt;&lt;/li&gt;&lt;/ul&gt;</description>
+            <pubDate>Sun, 25 Jan 2026 00:00:00 +0000</pubDate>
+        </item>
+        <item>
+            <title>0.2.0  (2025-06-29)</title>
+            <description>&lt;ul&gt;&lt;li&gt;&lt;p&gt;Implemented streamable&lt;code&gt;HTTP&lt;/code&gt; protocol and notifications on changed tools.&lt;/p&gt;&lt;/li&gt;&lt;/ul&gt;</description>
+            <pubDate>Sun, 29 Jun 2025 00:00:00 +0000</pubDate>
+        </item>
+        <item>
+            <title>0.1.0  (2025-06-22)</title>
+            <description>&lt;ul&gt;&lt;li&gt;&lt;p&gt;Initial version supporting &lt;code&gt;STDIO&lt;/code&gt; and Tools.&lt;/p&gt;&lt;/li&gt;&lt;/ul&gt;</description>
+            <pubDate>Sun, 22 Jun 2025 00:00:00 +0000</pubDate>
+        </item>
+    </channel>
+</rss>
